@@ -1,42 +1,47 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useAuth } from "@/Context/AuthContext"
-import { motion } from "framer-motion"
-import { Eye, EyeOff, Lock, Mail, Shield, Car, ArrowRight } from "lucide-react"
-import { useSettings } from "@/Context/SettingsContext"
-import Image from "next/image"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useAuth } from "@/Context/AuthContext";
+import { motion } from "framer-motion";
+import { Eye, EyeOff, Lock, Mail, Shield, Car, ArrowRight } from "lucide-react";
+import { useSettings } from "@/Context/SettingsContext";
+import Image from "next/image";
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const { settings } = useSettings();
-  const router = useRouter()
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
-      await login(email, password)
-      router.push("/admin/dashboard")
+      await login(email, password);
+      router.push("/admin/dashboard");
     } catch (error) {
-      console.error("Login failed:", error)
+      console.error("Login failed:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   console.log("Settings:", settings);
-  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-slate-100 flex items-center justify-center p-4">
@@ -91,10 +96,14 @@ export default function AdminLogin() {
                 width={50}
                 height={50}
                 className="object-cover"
-                />
+              />
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Admin Portal of</h1>
-                <p className="text-emerald-600 font-medium">{settings?.companyInfo?.name}</p>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Admin Portal of
+                </h1>
+                <p className="text-emerald-600 font-medium">
+                  {settings?.companyInfo?.name}
+                </p>
               </div>
             </div>
 
@@ -119,7 +128,9 @@ export default function AdminLogin() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl mb-6 mx-auto shadow-lg">
                 <Lock className="h-8 w-8 text-white" />
               </div>
-              <CardTitle className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</CardTitle>
+              <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
+                Welcome Back
+              </CardTitle>
               <CardDescription className="text-gray-600 text-lg">
                 Sign in to access your admin dashboard
               </CardDescription>
@@ -129,7 +140,10 @@ export default function AdminLogin() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Email Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="email"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Email Address
                   </Label>
                   <div className="relative">
@@ -148,7 +162,10 @@ export default function AdminLogin() {
 
                 {/* Password Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="password"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Password
                   </Label>
                   <div className="relative">
@@ -167,7 +184,11 @@ export default function AdminLogin() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                     >
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -197,7 +218,9 @@ export default function AdminLogin() {
                 <div className="flex items-start gap-3">
                   <Shield className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-emerald-800">Secure Login</p>
+                    <p className="text-sm font-medium text-emerald-800">
+                      Secure Login
+                    </p>
                     <p className="text-xs text-emerald-600 mt-1">
                       Your session is protected with enterprise-grade security
                     </p>
@@ -209,5 +232,5 @@ export default function AdminLogin() {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

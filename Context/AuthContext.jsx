@@ -3,6 +3,7 @@
 import React, { createContext, useState, useEffect } from "react";
 import API from "@/lib/api"; // axios instance
 import Cookies from "js-cookie";
+import CookieHelper from "@/lib/CookieHelper";
 
 export const AuthContext = createContext();
 
@@ -29,7 +30,20 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await API.post("/auth/login", { email, password });
-      setUser(response.data.user);
+      const { token, user } = response.data;
+
+      const existingToken = CookieHelper.getAuthToken();
+      if (!existingToken && token) {
+        // Manually set token if not present
+        CookieHelper.setAuthToken(token);
+        console.log("Manually set token in cookie");
+      } else if (existingToken) {
+        console.log("Token cookie already present");
+      } else {
+        console.warn("No token provided in response");
+      }
+
+      setUser(user);
       return { success: true, user: response.data.user };
     } catch (error) {
       console.error("Login error:", error);
