@@ -11,22 +11,22 @@ import WhyChooseUs from "@/components/WhyChooseUs";
 import CallToAction from "@/components/CallToAction";
 
 export default function Home() {
-  // const { verifyToken } = useAuth();
+  const { verifyToken } = useAuth();
 
-  // useEffect(() => {
-  //   verifyToken();
-  // }, []);
+  useEffect(() => {
+    verifyToken();
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-slate-50 via-emerald-50/30 to-slate-100">
       <Navbar />
-      {/* <main className="flex-1">
+      <main className="flex-1">
         <Hero />
         <FeaturedCars />
         <GetInTouch />
         <WhyChooseUs />
         <CallToAction />
-      </main> */}
+      </main>
       <Footer />
     </div>
   );
