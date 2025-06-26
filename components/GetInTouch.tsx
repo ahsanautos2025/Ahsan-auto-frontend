@@ -144,7 +144,7 @@ export default function GetInTouch() {
               </div>
               <div className="text-left">
                 <h4 className="font-semibold text-lg">Business Hours</h4>
-                <p className="text-emerald-100">Mon-Sat: 9:00 AM - 6:00 PM</p>
+                <p className="text-emerald-100">{settings?.businessHours.days} - {settings?.businessHours.open} to {settings?.businessHours.close}</p>
               </div>
             </div>
             
@@ -154,7 +154,7 @@ export default function GetInTouch() {
               </div>
               <div className="text-left">
                 <h4 className="font-semibold text-lg">Visit Our Showroom</h4>
-                <p className="text-emerald-100">Premium location in the city center</p>
+                <p className="text-emerald-100">{company?.address}</p>
               </div>
             </div>
           </div>

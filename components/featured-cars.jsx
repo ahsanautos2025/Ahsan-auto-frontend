@@ -17,8 +17,6 @@ export default function FeaturedCars() {
   const carsPerPage = 4
 
   const totalPages = Math.ceil(featuredCars.length / carsPerPage)
-  const totalCars = featuredCars.length
-
   useEffect(() => {
     getFeaturedCars()
   }, [])
@@ -134,18 +132,9 @@ export default function FeaturedCars() {
               Featured Collection
             </span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Premium
-            <span className="block text-transparent bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text">
-              Vehicles
-            </span>
-          </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Handpicked luxury vehicles that represent the pinnacle of automotive excellence
+            Handpicked vehicles that represent the pinnacle of automotive excellence
           </p>
-          <div className="mt-4 text-sm text-emerald-600 font-medium">
-            {totalCars} exceptional vehicle{totalCars !== 1 ? "s" : ""} available
-          </div>
         </motion.div>
 
         {/* Navigation Controls */}
@@ -283,9 +272,10 @@ export default function FeaturedCars() {
                       {/* CTA Button */}
                       <Button
                         asChild
-                        className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold rounded-xl py-3 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105"
+                        variant="outline"
+                        className="w-full font-semibold transition-all duration-300 group-hover:scale-105 border-emerald-500 hover:border-teal-500 text-emerald-600 hover:text-teal-600 shadow-sm hover:shadow-md"
                       >
-                        <Link href={`/cars/${car._id}`}>Explore Vehicle</Link>
+                        <Link href={`/cars/${getSlug(car)}`}>Explore Vehicle</Link>
                       </Button>
                     </CardContent>
                   </Card>
@@ -317,4 +307,9 @@ export default function FeaturedCars() {
       </div>
     </section>
   )
+}
+
+
+function getSlug(car) {
+  return `${car.name}-${car.year}-${car._id}`.toLowerCase().replace(/\s+/g, "-")
 }

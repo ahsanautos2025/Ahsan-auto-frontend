@@ -4,10 +4,8 @@ import { createContext, useContext, useState, useEffect } from "react";
 import API from "@/lib/api";
 import { toBase64 } from "@/lib/toBase64";
 
-// Create context
 const SettingsContext = createContext();
 
-// Provider component
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -47,16 +45,10 @@ export const SettingsProvider = ({ children }) => {
 
   const uploadLogo = async (file, alt = "Logo") => {
     try {
-      if (!file) {
-        return { success: false, error: "No file selected" };
-      }
+      if (!file) return { success: false, error: "No file selected" };
 
       const base64 = await toBase64(file);
-
-      const res = await API.post("/settings/logo", {
-        imageBase64: base64,
-        alt,
-      });
+      const res = await API.post("/settings/logo", { imageBase64: base64, alt });
 
       setSettings((prev) => ({
         ...prev,
@@ -91,15 +83,10 @@ export const SettingsProvider = ({ children }) => {
 
   const uploadTeamMemberImage = async (file, teamMemberId, alt = "Team Member Photo") => {
     try {
-      if (!file) {
-        return { success: false, error: "No file selected" };
-      }
-      if (!teamMemberId) {
-        return { success: false, error: "Team member ID is required" };
-      }
+      if (!file) return { success: false, error: "No file selected" };
+      if (!teamMemberId) return { success: false, error: "Team member ID is required" };
 
       const base64 = await toBase64(file);
-
       const res = await API.post("/team-member-image", {
         imageBase64: base64,
         teamMemberId,
@@ -125,13 +112,9 @@ export const SettingsProvider = ({ children }) => {
 
   const deleteTeamMemberImage = async (teamMemberId) => {
     try {
-      if (!teamMemberId) {
-        return { success: false, error: "Team member ID is required" };
-      }
+      if (!teamMemberId) return { success: false, error: "Team member ID is required" };
 
-      await API.delete("/team-member-image", {
-        data: { teamMemberId },
-      });
+      await API.delete("/settings/team-member-image", { data: { teamMemberId } });
 
       setSettings((prev) => ({
         ...prev,
@@ -154,13 +137,9 @@ export const SettingsProvider = ({ children }) => {
 
   const deleteTeamMember = async (teamMemberId) => {
     try {
-      if (!teamMemberId) {
-        return { success: false, error: "Team member ID is required" };
-      }
+      if (!teamMemberId) return { success: false, error: "Team member ID is required" };
 
-      const res = await API.delete("/team-member", {
-        data: { teamMemberId },
-      });
+      await API.delete("/settings/team-member", { data: { teamMemberId } });
 
       setSettings((prev) => ({
         ...prev,
@@ -173,6 +152,42 @@ export const SettingsProvider = ({ children }) => {
       return {
         success: false,
         error: err.response?.data?.error || "Failed to delete team member",
+      };
+    }
+  };
+
+  // ✅ Add a single stat
+  const addStat = async (stat) => {
+    try {
+      const res = await API.post("/settings/add-stat", stat);
+      setSettings((prev) => ({
+        ...prev,
+        stats: res.data.stats,
+      }));
+      return { success: true };
+    } catch (err) {
+      console.error("Add stat error:", err);
+      return {
+        success: false,
+        error: err.response?.data?.error || "Failed to add stat",
+      };
+    }
+  };
+
+  // ✅ Add a single team member
+  const addTeamMember = async (member) => {
+    try {
+      const res = await API.post("/settings/add-team-member", member);
+      setSettings((prev) => ({
+        ...prev,
+        teamMembers: res.data.teamMembers,
+      }));
+      return { success: true };
+    } catch (err) {
+      console.error("Add team member error:", err);
+      return {
+        success: false,
+        error: err.response?.data?.error || "Failed to add team member",
       };
     }
   };
@@ -190,6 +205,8 @@ export const SettingsProvider = ({ children }) => {
         uploadTeamMemberImage,
         deleteTeamMemberImage,
         deleteTeamMember,
+        addStat, // 👈 Added
+        addTeamMember, // 👈 Added
       }}
     >
       {children}
