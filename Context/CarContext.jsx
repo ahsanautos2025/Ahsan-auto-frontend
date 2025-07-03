@@ -21,6 +21,7 @@ export const CarProvider = ({ children }) => {
     return message;
   };
 
+
   const getCars = async ({
     page = 1,
     limit = 10,
@@ -220,6 +221,42 @@ export const CarProvider = ({ children }) => {
     }
   };
 
+  const uploadVideo = async (file, carId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const dataUrl = await toBase64(file); // Full data URI
+      const response = await API.post("/cars/upload-video", {
+        base64: dataUrl,
+        carId,
+      });
+  
+      return { success: true, data: response.data };
+    } catch (err) {
+      const message = handleError(err);
+      console.error("Upload video error:", err.response?.data || err);
+      return { success: false, error: message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteVideo = async (carId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await API.delete(`/cars/${carId}/video`);
+      return { success: true, data: response.data };
+    } catch (err) {
+      const message = handleError(err);
+      console.error("Delete video error:", err.response?.data || err);
+      return { success: false, error: message };
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
   const value = {
     cars,
     featuredCars,
@@ -236,6 +273,8 @@ export const CarProvider = ({ children }) => {
     uploadImages,
     updateImage,
     deleteImage,
+    uploadVideo,
+    deleteVideo,
     clearError: () => setError(null),
   };
 

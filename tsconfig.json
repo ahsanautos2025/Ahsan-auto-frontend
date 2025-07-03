@@ -22,6 +22,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/admin/page.jsx", "app/admin/dashboard/page.jsx", "app/cars/page.jsx", "components/featured-cars.jsx", "app/cars/[slugAndId]/page.jsx", "app/cars/[slugAndId]/CarDetails.jsx", "components/Sub-header.jsx", "app/admin/dashboard/layout.jsx", "app/admin/dashboard/setting/page.jsx", "components/ToasterClient.jsx", "lib/toBase64.jsx", "app/contact/page.jsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/admin/page.jsx", "app/admin/dashboard/page.jsx", "app/cars/page.jsx", "components/featured-cars.jsx", "app/cars/[slugAndId]/page.jsx", "app/cars/[slugAndId]/CarDetails.jsx", "components/Sub-header.jsx", "app/admin/dashboard/layout.jsx", "app/admin/dashboard/setting/page.jsx", "components/ToasterClient.jsx", "lib/toBase64.jsx", "app/contact/page.jsx", "components/WhyChooseUs.jsx", "app/about/page.jsx"],
   "exclude": ["node_modules"]
 }

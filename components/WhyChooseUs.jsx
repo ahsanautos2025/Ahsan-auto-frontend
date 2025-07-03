@@ -2,8 +2,11 @@
 
 import { Shield, Award, Users, Zap, Heart, Star } from 'lucide-react';
 import { motion } from "framer-motion";
+import { useSettings } from '@/Context/SettingsContext';
 
 export default function WhyChooseUs() {
+  const { settings } = useSettings();
+
   const features = [
     {
       icon: <Award className="h-8 w-8" />,
@@ -28,11 +31,7 @@ export default function WhyChooseUs() {
     }
   ];
 
-  const stats = [
-    { number: "500+", label: "Happy Customers", delay: 0.4 },
-    { number: "50+", label: "Premium Vehicles", delay: 0.5 },
-    { number: "10+", label: "Years Experience", delay: 0.6 }
-  ];
+  const stats = settings?.stats || [];
 
   return (
     <section className="relative py-24 overflow-hidden">
@@ -69,7 +68,7 @@ export default function WhyChooseUs() {
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          {features.map((feature, index) => (
+          {features.map((feature) => (
             <motion.div
               key={feature.title}
               initial={{ opacity: 0, y: 50 }}
@@ -79,15 +78,10 @@ export default function WhyChooseUs() {
               className="group relative"
             >
               <div className="relative bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-emerald-400/30 transition-all duration-500 hover:bg-white/10">
-                {/* Gradient Glow Effect */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity duration-500`} />
-                
-                {/* Icon */}
                 <div className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${feature.color} text-black mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                   {feature.icon}
                 </div>
-
-                {/* Content */}
                 <div className="space-y-4 relative z-10">
                   <h3 className="text-xl font-bold text-black group-hover:text-black/90 transition-colors duration-300">
                     {feature.title}
@@ -96,8 +90,6 @@ export default function WhyChooseUs() {
                     {feature.description}
                   </p>
                 </div>
-
-                {/* Decorative Element */}
                 <div className="absolute top-4 right-4 opacity-20 group-hover:opacity-40 transition-opacity duration-300">
                   <Star className="h-6 w-6 text-emerald-400" />
                 </div>
@@ -117,10 +109,10 @@ export default function WhyChooseUs() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {stats.map((stat, index) => (
               <motion.div
-                key={stat.label}
+                key={stat._id}
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: stat.delay }}
+                transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
                 viewport={{ once: true }}
                 className="text-center group"
               >

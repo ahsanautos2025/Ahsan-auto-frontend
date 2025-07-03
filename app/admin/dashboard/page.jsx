@@ -25,6 +25,8 @@ export default function AdminDashboardPage() {
     loading,
     error,
     pagination,
+    uploadVideo,
+    deleteVideo,
   } = useCars();
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -79,6 +81,7 @@ export default function AdminDashboardPage() {
           uploadImages={uploadImages}
           refreshCars={() => getCars({ page: 1 })}
           error={error}
+          uploadVideo={uploadVideo}
         />
         <EditCarDialog
           isOpen={isEditDialogOpen}
@@ -90,6 +93,8 @@ export default function AdminDashboardPage() {
           deleteImage={deleteImage}
           refreshCars={() => getCars({ page: pagination.page })}
           error={error}
+          uploadVideo={uploadVideo}
+          deleteVideo={deleteVideo}
         />
         <DeleteCarDialog
           isOpen={isDeleteDialogOpen}

@@ -20,6 +20,7 @@ export default function AddCarDialog({
   uploadImages,
   refreshCars,
   error,
+  uploadVideo,
 }) {
   const [newCar, setNewCar] = useState({
     name: "",
@@ -33,6 +34,7 @@ export default function AddCarDialog({
     featured: false,
   });
   const [newCarImages, setNewCarImages] = useState([]);
+  const [newCarVideo, setNewCarVideo] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -44,6 +46,11 @@ export default function AddCarDialog({
     setNewCarImages(Array.from(e.target.files));
   };
 
+  const handleVideoUpload = (e) => {
+    const file = e.target.files[0];
+    setNewCarVideo(file);
+  };
+
   const handleAddCar = async () => {
     try {
       const carData = {
@@ -52,47 +59,68 @@ export default function AddCarDialog({
         year: Number.parseInt(newCar.year),
         mileage: Number.parseInt(newCar.mileage),
       };
+  
+      // Step 1: Create the car first
       const response = await createCar(carData);
-      if (response.success) {
-        console.log("Car created with ID:", response.data._id);
-        if (newCarImages.length > 0) {
-          console.log("Uploading images for new car:", newCarImages.length);
-          const uploadResponse = await uploadImages(
-            response.data._id,
-            newCarImages
-          );
-          if (!uploadResponse.success) {
-            console.error("Image upload failed:", uploadResponse.error);
-            alert(
-              `Car created, but failed to upload images: ${uploadResponse.error}`
-            );
-          }
-        } else {
-          console.log("No images selected for upload");
-        }
-        setIsOpen(false);
-        setNewCar({
-          name: "",
-          price: "",
-          year: "",
-          mileage: "",
-          transmission: "Automatic",
-          bodyType: "",
-          fuelType: "",
-          color: "",
-          featured: false,
-        });
-        setNewCarImages([]);
-        refreshCars();
-      } else {
+      if (!response.success) {
         console.error("Car creation failed:", response.error);
         alert(response.error);
+        return;
       }
+  
+      const carId = response.data._id;
+      console.log("Car created with ID:", carId);
+  
+      // Step 2: Upload images
+      if (newCarImages.length > 0) {
+        console.log("Uploading images for new car:", newCarImages.length);
+        const uploadResponse = await uploadImages(carId, newCarImages);
+        if (!uploadResponse.success) {
+          console.error("Image upload failed:", uploadResponse.error);
+          alert(`Car created, but failed to upload images: ${uploadResponse.error}`);
+        }
+      } else {
+        console.log("No images selected for upload");
+      }
+  
+      // Step 3: Upload video
+      if (newCarVideo) {
+        console.log("Uploading video for new car:", newCarVideo.name);
+        const videoResponse = await uploadVideo(newCarVideo, carId);
+        if (videoResponse.success) {
+          console.log("Video uploaded successfully:", videoResponse.data.url);
+          // Optional: attach video URL to the car via update
+          await updateCar(carId, { videoUrl: videoResponse.data.url });
+        } else {
+          console.error("Video upload failed:", videoResponse.error);
+          alert(`Video upload failed: ${videoResponse.error}`);
+        }
+      } else {
+        console.log("No video selected for upload");
+      }
+  
+      // Step 4: Reset form
+      setIsOpen(false);
+      setNewCar({
+        name: "",
+        price: "",
+        year: "",
+        mileage: "",
+        transmission: "Automatic",
+        bodyType: "",
+        fuelType: "",
+        color: "",
+        featured: false,
+      });
+      setNewCarImages([]);
+      setNewCarVideo(null); // <-- reset video
+      refreshCars();
     } catch (err) {
       console.error("Add car error:", err);
       alert("Failed to add car");
     }
   };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -209,6 +237,21 @@ export default function AddCarDialog({
             {newCarImages.length > 0 && (
               <p className="text-sm text-gray-600">
                 {newCarImages.length} image(s) selected
+              </p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="add-video">Upload Video</Label>
+            <input
+              id="add-video"
+              type="file"
+              accept="video/*"
+              onChange={handleVideoUpload}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#245dc7] file:text-white hover:file:bg-[#1e4da6]"
+            />
+            {newCarVideo && (
+              <p className="text-sm text-gray-600">
+                {newCarVideo.name} selected
               </p>
             )}
           </div>

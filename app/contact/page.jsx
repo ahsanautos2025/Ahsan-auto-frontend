@@ -83,17 +83,17 @@ export default function ContactPage() {
     )
   }
 
-  const { companyInfo, businessHours } = settings || {}
+  const { companyInfo, businessHours, stats } = settings || {}
 
   const contactMethods = [
     {
       icon: <Phone className="h-8 w-8" />,
       title: "Call Us",
-      description: `Available ${businessHours?.days || "Mon-Sat"}: ${businessHours?.open || "9:00 AM"} - ${
-        businessHours?.close || "6:00 PM"
+      description: `Available ${businessHours?.days || "Sunday to Thursday"}: ${businessHours?.open || "9 AM"} - ${
+        businessHours?.close || "5 AM"
       }`,
-      action: companyInfo?.phone ? formatPhone(companyInfo.phone) : "+1 (234) 567-890",
-      href: `tel:${companyInfo?.phone || "+1234567890"}`,
+      action: companyInfo?.phone ? formatPhone(companyInfo.phone) : "+8801971060038",
+      href: `tel:${companyInfo?.phone || "+8801971060038"}`,
       color: "from-emerald-500 to-teal-500",
       delay: 0.1,
     },
@@ -101,8 +101,8 @@ export default function ContactPage() {
       icon: <Mail className="h-8 w-8" />,
       title: "Email Us",
       description: "We'll respond within 24 hours",
-      action: companyInfo?.email || "info@luxurycars.com",
-      href: `mailto:${companyInfo?.email || "info@luxurycars.com"}`,
+      action: companyInfo?.email || "info@ahsanautos.com",
+      href: `mailto:${companyInfo?.email || "info@ahsanautos.com"}`,
       color: "from-emerald-600 to-emerald-700",
       delay: 0.2,
     },
@@ -111,7 +111,7 @@ export default function ContactPage() {
       title: "WhatsApp",
       description: "Chat with our sales team",
       action: "Message Us",
-      href: `https://wa.me/${companyInfo?.whatsapp || "1234567890"}`,
+      href: `https://wa.me/${companyInfo?.whatsapp || "+8801971060038"}`,
       color: "from-teal-500 to-emerald-600",
       delay: 0.3,
     },
@@ -231,7 +231,7 @@ export default function ContactPage() {
                             id="name"
                             value={formData.name}
                             onChange={handleChange}
-                            placeholder="John Doe"
+                            placeholder="ENTER FULL NAME"
                             className="pl-10 h-12 rounded-xl border-gray-200 focus:border-emerald-300 focus:ring-emerald-200"
                             required
                           />
@@ -249,7 +249,7 @@ export default function ContactPage() {
                             type="email"
                             value={formData.email}
                             onChange={handleChange}
-                            placeholder="john@example.com"
+                            placeholder="ENTER EMAIL ADDRESS"
                             className="pl-10 h-12 rounded-xl border-gray-200 focus:border-emerald-300 focus:ring-emerald-200"
                             required
                           />
@@ -268,7 +268,7 @@ export default function ContactPage() {
                             id="phone"
                             value={formData.phone}
                             onChange={handleChange}
-                            placeholder="+1 (234) 567-890"
+                            placeholder="ENTER PHONE NUMBER"
                             className="pl-10 h-12 rounded-xl border-gray-200 focus:border-emerald-300 focus:ring-emerald-200"
                           />
                         </div>
@@ -282,7 +282,7 @@ export default function ContactPage() {
                           id="subject"
                           value={formData.subject}
                           onChange={handleChange}
-                          placeholder="Vehicle Enquiry"
+                          placeholder="e.g Vehicle Enquiry"
                           className="h-12 rounded-xl border-gray-200 focus:border-emerald-300 focus:ring-emerald-200"
                         />
                       </div>
@@ -321,11 +321,6 @@ export default function ContactPage() {
                       )}
                     </Button>
 
-                    {enquiryError && (
-                      <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-                        <p className="text-red-600 text-sm">{enquiryError}</p>
-                      </div>
-                    )}
                   </form>
                 </div>
               </motion.div>
@@ -354,10 +349,10 @@ export default function ContactPage() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900 mb-1">
-                          {companyInfo?.name || "LuxuryCars Showroom"}
+                          {companyInfo?.name || "Ahsan Autos"}
                         </h3>
                         <p className="text-gray-600 leading-relaxed">
-                          {companyInfo?.address || "123 Luxury Lane, Prestige City, PC 12345, United States"}
+                          {companyInfo?.address || "House 378, Road 9/A, Block D, Bashundhara R/A, Dhaka - 1229"}
                         </p>
                       </div>
                     </div>
@@ -369,8 +364,8 @@ export default function ContactPage() {
                       <div>
                         <h3 className="font-semibold text-gray-900 mb-1">Business Hours</h3>
                         <p className="text-gray-600">
-                          {businessHours?.days || "Monday - Friday"}: {businessHours?.open || "9:00 AM"} -{" "}
-                          {businessHours?.close || "6:00 PM"}
+                          {businessHours?.days || "Sunday to Thursday"}: {businessHours?.open || "9 AM"} -{" "}
+                          {businessHours?.close || "5 AM"}
                         </p>
                         <p className="text-gray-600">Saturday: 9:00 AM - 4:00 PM</p>
                         <p className="text-gray-600">Sunday: Closed</p>
@@ -392,27 +387,17 @@ export default function ContactPage() {
                 </div>
 
                 {/* Quick Stats */}
-                {/* <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-8 text-white">
+                <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-8 text-white">
                   <h3 className="text-xl font-bold mb-6">Why Choose Us?</h3>
                   <div className="grid grid-cols-2 gap-6">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-emerald-200 mb-1">24/7</div>
-                      <div className="text-sm text-emerald-100">Customer Support</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-emerald-200 mb-1">500+</div>
-                      <div className="text-sm text-emerald-100">Happy Customers</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-emerald-200 mb-1">50+</div>
-                      <div className="text-sm text-emerald-100">Premium Vehicles</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-emerald-200 mb-1">10+</div>
-                      <div className="text-sm text-emerald-100">Years Experience</div>
-                    </div>
+                    {stats?.map((stat) => (
+                      <div key={stat._id} className="text-center">
+                        <div className="text-2xl font-bold text-emerald-200 mb-1">{stat.number}</div>
+                        <div className="text-sm text-emerald-100">{stat.label}</div>
+                      </div>
+                    ))}
                   </div>
-                </div> */}
+                </div>
               </motion.div>
             </div>
           </div>

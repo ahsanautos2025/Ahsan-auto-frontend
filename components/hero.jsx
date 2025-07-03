@@ -47,7 +47,7 @@ export default function Hero() {
               className="object-cover w-full h-full"
               priority={index === 0}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-900/80 via-emerald-800/60 to-transparent" />
+            <div className="absolute inset-0 bg-black/70" />
           </div>
         ))}
       </div>

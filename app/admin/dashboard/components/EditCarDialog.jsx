@@ -33,6 +33,8 @@ export default function EditCarDialog({
   deleteImage,
   refreshCars,
   error,
+  uploadVideo,
+  deleteVideo,
 }) {
   const [carData, setCarData] = useState(
     currentCar
@@ -62,6 +64,10 @@ export default function EditCarDialog({
       isPrimary: img.isPrimary || false,
     })) || []
   );
+  const [videoFile, setVideoFile] = useState(null);
+  const [existingVideoUrl, setExistingVideoUrl] = useState(
+    currentCar?.videoUrl || ""
+  );
 
   useEffect(() => {
     if (currentCar) {
@@ -85,6 +91,8 @@ export default function EditCarDialog({
           isPrimary: img.isPrimary || false,
         })) || []
       );
+      setFeaturesInput(currentCar.features?.join(", ") || "");
+      setExistingVideoUrl(currentCar.videoUrl || "");
     }
   }, [currentCar]);
 
@@ -200,6 +208,16 @@ export default function EditCarDialog({
             }
           }
         }
+        if (videoFile) {
+          const videoResponse = await uploadVideo(videoFile, _id);
+          if (videoResponse.success) {
+            console.log("Video uploaded:", videoResponse.data.url);
+            await updateCar(_id, { videoUrl: videoResponse.data.url });
+          } else {
+            console.error("Video upload failed:", videoResponse.error);
+            toast.error(videoResponse.error || "Failed to upload video");
+          }
+        }
         setIsOpen(false);
         setCarData(null);
         setImageFiles([]);
@@ -212,6 +230,20 @@ export default function EditCarDialog({
     } catch (err) {
       console.error("Edit car error:", err);
       toast.error("Failed to update car");
+    }
+  };
+
+  const handleDeleteVideo = async () => {
+    try {
+      const res = await deleteVideo(carData._id);
+      if (res.success) {
+        setCarData((prev) => ({ ...prev, videoUrl: null }));
+        toast.success("Video deleted successfully");
+      } else {
+        toast.error(res.error || "Failed to delete video");
+      }
+    } catch (err) {
+      toast.error("Failed to delete video");
     }
   };
 
@@ -473,6 +505,25 @@ export default function EditCarDialog({
               </div>
             </div>
           )}
+          {carData.videoUrl && (
+            <div className="space-y-2">
+              <Label>Current Video</Label>
+              <video
+                src={carData.videoUrl}
+                controls
+                className="w-full rounded-md"
+              />
+              <Button
+                variant="destructive"
+                size="sm"
+                className="mt-2"
+                onClick={handleDeleteVideo}
+              >
+                <Trash className="h-4 w-4 mr-1" />
+                Delete Video
+              </Button>
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="edit-images">Upload New Images</Label>
             <input
@@ -489,6 +540,20 @@ export default function EditCarDialog({
               </p>
             )}
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="edit-video">Upload/Replace Video</Label>
+            <input
+              id="edit-video"
+              type="file"
+              accept="video/*"
+              onChange={(e) => setVideoFile(e.target.files[0])}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#245dc7] file:text-white hover:file:bg-[#1e4da6]"
+            />
+            {videoFile && (
+              <p className="text-sm text-gray-600">{videoFile.name} selected</p>
+            )}
+          </div>
+
           <div className="flex items-center space-x-2">
             <input
               type="checkbox"
