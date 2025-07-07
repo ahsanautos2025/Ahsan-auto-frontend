@@ -48,7 +48,8 @@ export const SettingsProvider = ({ children }) => {
       if (!file) return { success: false, error: "No file selected" };
 
       const base64 = await toBase64(file);
-      const res = await API.post("/settings/logo", { imageBase64: base64, alt });
+      const res = await API.post("/settings/logo", { imageUrlBase64: base64, altText: alt });
+
 
       setSettings((prev) => ({
         ...prev,
