@@ -6,11 +6,10 @@ import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
 
-const carBanners = [
-  process.env.NEXT_PUBLIC_CAR_BANNER_1,
-  process.env.NEXT_PUBLIC_CAR_BANNER_2,
-  process.env.NEXT_PUBLIC_CAR_BANNER_3,
-].filter(Boolean);
+const carBanners = (process.env.NEXT_PUBLIC_CAR_BANNERS || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 export default function Hero() {
   const [current, setCurrent] = useState(0);

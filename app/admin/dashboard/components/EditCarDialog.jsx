@@ -68,6 +68,10 @@ export default function EditCarDialog({
   const [existingVideoUrl, setExistingVideoUrl] = useState(
     currentCar?.videoUrl || ""
   );
+  const [loading, setLoading] = useState({
+    images: false,
+    video: false,
+  });
 
   useEffect(() => {
     if (currentCar) {
@@ -96,13 +100,6 @@ export default function EditCarDialog({
     }
   }, [currentCar]);
 
-  useEffect(() => {
-    if (currentCar) {
-      setCarData(currentCar); // your existing logic
-      setFeaturesInput(currentCar.features?.join(", ") || "");
-    }
-  }, [currentCar]);
-
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     const updatedValue = type === "checkbox" ? checked : value;
@@ -117,7 +114,7 @@ export default function EditCarDialog({
     setImageUpdates((prev) => {
       let updates = prev.map((update) =>
         update.imageId === imageId
-          ? { ...update, [field]: value }
+          ? { ...update, [field]: field === "isPrimary" ? !update.isPrimary : value }
           : field === "isPrimary" && value
           ? { ...update, isPrimary: false } // Deselect others if setting one as primary
           : update
@@ -126,7 +123,7 @@ export default function EditCarDialog({
       if (!prev.find((u) => u.imageId === imageId)) {
         return [
           ...prev,
-          { imageId, alt: "", isPrimary: field === "isPrimary" },
+          { imageId, alt: "", isPrimary: field === "isPrimary" ? value : false },
         ];
       }
 
@@ -177,8 +174,10 @@ export default function EditCarDialog({
       const response = await updateCar(_id, updatedCarData);
       if (response.success) {
         if (imageFiles.length > 0) {
+          setLoading((prev) => ({ ...prev, images: true }));
           console.log("Uploading new images:", imageFiles.length);
           const uploadResponse = await uploadImages(carData._id, imageFiles);
+          setLoading((prev) => ({ ...prev, images: false }));
           if (!uploadResponse.success) {
             console.error("Image upload failed:", uploadResponse.error);
             toast.error(uploadResponse.error || "Failed to upload images");
@@ -209,7 +208,9 @@ export default function EditCarDialog({
           }
         }
         if (videoFile) {
+          setLoading((prev) => ({ ...prev, video: true }));
           const videoResponse = await uploadVideo(videoFile, _id);
+          setLoading((prev) => ({ ...prev, video: false }));
           if (videoResponse.success) {
             console.log("Video uploaded:", videoResponse.data.url);
             await updateCar(_id, { videoUrl: videoResponse.data.url });
@@ -480,7 +481,7 @@ export default function EditCarDialog({
                               handleImageMetadataChange(
                                 image._id,
                                 "isPrimary",
-                                true
+                                !update.isPrimary
                               )
                             }
                             className="h-4 w-4 rounded border-gray-300 text-[#245dc7] focus:ring-[#245dc7]"
@@ -526,14 +527,22 @@ export default function EditCarDialog({
           )}
           <div className="space-y-2">
             <Label htmlFor="edit-images">Upload New Images</Label>
-            <input
-              id="edit-images"
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImageUpload}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#245dc7] file:text-white hover:file:bg-[#1e4da6]"
-            />
+            <div className="relative">
+              <input
+                id="edit-images"
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageUpload}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#245dc7] file:text-white hover:file:bg-[#1e4da6]"
+                disabled={loading.images}
+              />
+              {loading.images && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50 rounded-md">
+                  <div className="w-6 h-6 border-2 border-[#245dc7] border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
+            </div>
             {imageFiles.length > 0 && (
               <p className="text-sm text-gray-600">
                 {imageFiles.length} image(s) selected
@@ -542,18 +551,25 @@ export default function EditCarDialog({
           </div>
           <div className="space-y-2">
             <Label htmlFor="edit-video">Upload/Replace Video</Label>
-            <input
-              id="edit-video"
-              type="file"
-              accept="video/*"
-              onChange={(e) => setVideoFile(e.target.files[0])}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#245dc7] file:text-white hover:file:bg-[#1e4da6]"
-            />
+            <div className="relative">
+              <input
+                id="edit-video"
+                type="file"
+                accept="video/*"
+                onChange={(e) => setVideoFile(e.target.files[0])}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#245dc7] file:text-white hover:file:bg-[#1e4da6]"
+                disabled={loading.video}
+              />
+              {loading.video && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50 rounded-md">
+                  <div className="w-6 h-6 border-2 border-[#245dc7] border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
+            </div>
             {videoFile && (
               <p className="text-sm text-gray-600">{videoFile.name} selected</p>
             )}
           </div>
-
           <div className="flex items-center space-x-2">
             <input
               type="checkbox"
@@ -567,14 +583,22 @@ export default function EditCarDialog({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setIsOpen(false)}>
+          <Button variant="outline" onClick={() => setIsOpen(false)} disabled={loading.images || loading.video}>
             Cancel
           </Button>
           <Button
             onClick={handleEditCar}
             className="bg-[#245dc7] hover:bg-[#1e4da6]"
+            disabled={loading.images || loading.video}
           >
-            Save Changes
+            {loading.images || loading.video ? (
+              <div className="flex items-center">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                Saving...
+              </div>
+            ) : (
+              "Save Changes"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

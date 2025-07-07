@@ -8,12 +8,7 @@ import { StatsProvider } from "@/Context/StatsContext";
 import { EnquiryProvider } from "@/Context/EnquiryContext";
 
 import ToasterClient from "@/components/ToasterClient";
-
-export const metadata: Metadata = {
-  title: "Ahsan Auto's",
-  description:
-    "Ahsan Auto's - Premium Cars for Discerning Drivers - Quality, Luxury, and Exceptional Service in Every Ride. Now is Available in Bangladesh!",
-};
+import DynamicSEO from "./DynamicSEO";
 
 export default function RootLayout({
   children,
@@ -29,6 +24,7 @@ export default function RootLayout({
               <BulkImportProvider>
                 <StatsProvider>
                   <EnquiryProvider>
+                  <DynamicSEO />
                     {children}
                     <ToasterClient />
                   </EnquiryProvider>
