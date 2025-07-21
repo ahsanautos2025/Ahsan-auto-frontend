@@ -201,9 +201,11 @@ export default function FeaturedCars() {
                         <h3 className="text-lg font-bold text-gray-900 line-clamp-1 group-hover:text-black transition-colors duration-300">
                           {car.name}
                         </h3>
+                        {/* Price element commented out
                         <p className="text-lg font-bold text-transparent bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text ml-2 whitespace-nowrap">
                           ৳{car.price.toLocaleString()}
                         </p>
+                        */}
                       </div>
                       <div className="grid grid-cols-3 gap-4 mb-6">
                         <div className="text-center p-3 bg-emerald-50 rounded-xl">

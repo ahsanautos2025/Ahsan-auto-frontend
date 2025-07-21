@@ -63,10 +63,6 @@ export default function CarsPage() {
   const [searchYear, setSearchYear] = useState(
     searchParams.get("yearSearch") || ""
   );
-  const [priceRange, setPriceRange] = useState([
-    Number(searchParams.get("priceMin")) || 0,
-    Number(searchParams.get("priceMax")) || 50000000,
-  ]);
   const [yearFilter, setYearFilter] = useState(searchParams.get("year") || "");
   const [bodyTypeFilter, setBodyTypeFilter] = useState(
     searchParams.get("bodyType")?.split(",") || []
@@ -109,9 +105,9 @@ export default function CarsPage() {
       const params = new URLSearchParams();
       if (searchTerm) params.set("search", searchTerm);
       if (searchYear) params.set("yearSearch", searchYear);
-      if (priceRange[0] > 0) params.set("priceMin", priceRange[0].toString());
-      if (priceRange[1] < 50000000)
-        params.set("priceMax", priceRange[1].toString());
+      // Comment out price params
+      // if (priceRange[0] > 0) params.set("priceMin", priceRange[0].toString());
+      // if (priceRange[1] < 50000000) params.set("priceMax", priceRange[1].toString());
       if (yearFilter) params.set("year", yearFilter);
       if (bodyTypeFilter.length)
         params.set("bodyType", bodyTypeFilter.join(","));
@@ -127,7 +123,8 @@ export default function CarsPage() {
     [
       searchTerm,
       searchYear,
-      priceRange,
+      // Remove priceRange from dependencies
+      // priceRange,
       yearFilter,
       bodyTypeFilter,
       fuelTypeFilter,
@@ -147,8 +144,8 @@ export default function CarsPage() {
       const matchesSearchYear = searchYear
         ? car.year.toString().includes(searchYear)
         : true;
-      const matchesPrice =
-        car.price >= priceRange[0] && car.price <= priceRange[1];
+      // const matchesPrice =
+      //   car.price >= priceRange[0] && car.price <= priceRange[1];
       const matchesYear = yearFilter
         ? car.year.toString() === yearFilter
         : true;
@@ -168,7 +165,7 @@ export default function CarsPage() {
       return (
         matchesName &&
         matchesSearchYear &&
-        matchesPrice &&
+        // matchesPrice &&
         matchesYear &&
         matchesBodyType &&
         matchesFuelType &&
@@ -180,7 +177,7 @@ export default function CarsPage() {
     cars,
     searchTerm,
     searchYear,
-    priceRange,
+    // priceRange,
     yearFilter,
     bodyTypeFilter,
     fuelTypeFilter,
@@ -199,9 +196,9 @@ export default function CarsPage() {
   // Fetch cars with filters
   useEffect(() => {
     const filters = {};
-    if (priceRange[0] > 0 || priceRange[1] < 50000000) {
-      filters.price = { min: priceRange[0], max: priceRange[1] };
-    }
+    // if (priceRange[0] > 0 || priceRange[1] < 50000000) {
+    //   filters.price = { min: priceRange[0], max: priceRange[1] };
+    // }
     if (yearFilter) {
       filters.year = {
         min: Number.parseInt(yearFilter),
@@ -223,7 +220,7 @@ export default function CarsPage() {
 
     getCars({ page: 1, limit: 100, sort: sortOption, filters });
   }, [
-    priceRange,
+    // priceRange,
     yearFilter,
     bodyTypeFilter,
     fuelTypeFilter,
@@ -238,7 +235,7 @@ export default function CarsPage() {
   }, [
     searchTerm,
     searchYear,
-    priceRange,
+    // priceRange,
     yearFilter,
     bodyTypeFilter,
     fuelTypeFilter,
@@ -255,7 +252,7 @@ export default function CarsPage() {
   }, [
     searchTerm,
     searchYear,
-    priceRange,
+    // priceRange,
     yearFilter,
     bodyTypeFilter,
     fuelTypeFilter,
@@ -292,7 +289,7 @@ export default function CarsPage() {
   const resetFilters = () => {
     setSearchTerm("");
     setSearchYear("");
-    setPriceRange([0, 50000000]);
+    // setPriceRange([0, 50000000]);
     setYearFilter("");
     setBodyTypeFilter([]);
     setFuelTypeFilter([]);
@@ -358,7 +355,7 @@ export default function CarsPage() {
     ...bodyTypeFilter,
     ...fuelTypeFilter,
     ...colorFilter,
-    priceRange[0] > 0 || priceRange[1] < 50000000 ? "price" : null,
+    // priceRange[0] > 0 || priceRange[1] < 50000000 ? "price" : null,
     availabilityFilter !== "available" ? "availability" : null,
   ].filter(Boolean).length;
 
@@ -467,7 +464,7 @@ export default function CarsPage() {
                         defaultValue={["price"]}
                       >
                         {/* Price Range Filter */}
-                        <AccordionItem value="price">
+                        {/* <AccordionItem value="price">
                           <AccordionTrigger className="text-base font-medium">
                             💰 Price Range
                           </AccordionTrigger>
@@ -487,7 +484,7 @@ export default function CarsPage() {
                               />
                             </div>
                           </AccordionContent>
-                        </AccordionItem>
+                        </AccordionItem> */}
 
                         {/* Year Filter */}
                         <AccordionItem value="year">
@@ -767,9 +764,9 @@ export default function CarsPage() {
                             <h3 className="text-lg font-semibold text-gray-900 line-clamp-1 group-hover:text-emerald-700 transition-colors">
                               {car.name}
                             </h3>
-                            <p className="text-lg font-bold text-emerald-600 ml-2 flex-shrink-0">
+                            {/* <p className="text-lg font-bold text-emerald-600 ml-2 flex-shrink-0">
                               ৳{car.price.toLocaleString()}
-                            </p>
+                            </p> */}
                           </div>
 
                           <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">

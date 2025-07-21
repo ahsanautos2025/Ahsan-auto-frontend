@@ -454,9 +454,11 @@ export default function CarDetails({ slugAndId }) {
                       {currentCar?.name}
                     </h1>
                   </div>
-                  <div className="text-3xl font-bold text-emerald-600 mb-6">
-                    ৳ {currentCar?.price.toLocaleString()}
-                  </div>
+                 {/* Price element commented out
+  <div className="text-3xl font-bold text-emerald-600 mb-6">
+    ৳ {currentCar?.price.toLocaleString()}
+  </div>
+  */}
                 </div>
 
                 {/* Key Specs Grid */}
