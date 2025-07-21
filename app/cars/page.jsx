@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import Image from "next/image"
-import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Filter,
   Search,
@@ -17,66 +17,112 @@ import {
   Settings,
   X,
   SlidersHorizontal,
-} from "lucide-react"
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
-import { useCars } from "@/Context/CarContext"
-import debounce from "lodash/debounce"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { useCars } from "@/Context/CarContext";
+import debounce from "lodash/debounce";
 
-const ITEMS_PER_PAGE = 20
+const ITEMS_PER_PAGE = 20;
 
 export default function CarsPage() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Initialize filter states from URL query parameters
-  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "")
-  const [searchYear, setSearchYear] = useState(searchParams.get("yearSearch") || "")
+  const [searchTerm, setSearchTerm] = useState(
+    searchParams.get("search") || ""
+  );
+  const [searchYear, setSearchYear] = useState(
+    searchParams.get("yearSearch") || ""
+  );
   const [priceRange, setPriceRange] = useState([
     Number(searchParams.get("priceMin")) || 0,
     Number(searchParams.get("priceMax")) || 50000000,
-  ])
-  const [yearFilter, setYearFilter] = useState(searchParams.get("year") || "")
-  const [bodyTypeFilter, setBodyTypeFilter] = useState(searchParams.get("bodyType")?.split(",") || [])
-  const [fuelTypeFilter, setFuelTypeFilter] = useState(searchParams.get("fuelType")?.split(",") || [])
-  const [colorFilter, setColorFilter] = useState(searchParams.get("color")?.split(",") || [])
-  const [sortOption, setSortOption] = useState(searchParams.get("sort") || "createdAt")
-  const [currentPage, setCurrentPage] = useState(Number(searchParams.get("page")) || 1)
+  ]);
+  const [yearFilter, setYearFilter] = useState(searchParams.get("year") || "");
+  const [bodyTypeFilter, setBodyTypeFilter] = useState(
+    searchParams.get("bodyType")?.split(",") || []
+  );
+  const [fuelTypeFilter, setFuelTypeFilter] = useState(
+    searchParams.get("fuelType")?.split(",") || []
+  );
+  const [colorFilter, setColorFilter] = useState(
+    searchParams.get("color")?.split(",") || []
+  );
+  const [sortOption, setSortOption] = useState(
+    searchParams.get("sort") || "createdAt"
+  );
+  const [currentPage, setCurrentPage] = useState(
+    Number(searchParams.get("page")) || 1
+  );
+  const [availabilityFilter, setAvailabilityFilter] = useState(
+    searchParams.get("filter") || "available"
+  );
 
-  const { cars, getCars, loading, error } = useCars()
+  const { cars, getCars, loading, error } = useCars();
 
   // Predefined filter options
-  const uniqueYears = [2024, 2023, 2022, 2021, 2020, 2019, 2018]
-  const uniqueBodyTypes = ["Sedan", "SUV", "Coupe", "Hatchback", "Convertible"]
-  const uniqueFuelTypes = ["Petrol", "Diesel", "Hybrid", "Electric"]
-  const uniqueColors = ["Black", "White", "Silver", "Red", "Blue", "Green", "Gray"]
+  const uniqueYears = [2024, 2023, 2022, 2021, 2020, 2019, 2018];
+  const uniqueBodyTypes = ["Sedan", "SUV", "Coupe", "Hatchback", "Convertible"];
+  const uniqueFuelTypes = ["Petrol", "Diesel", "Hybrid", "Electric"];
+  const uniqueColors = [
+    "Black",
+    "White",
+    "Silver",
+    "Red",
+    "Blue",
+    "Green",
+    "Gray",
+  ];
 
   // Update URL with filter parameters
   const updateURL = useCallback(
     debounce(() => {
-      const params = new URLSearchParams()
-      if (searchTerm) params.set("search", searchTerm)
-      if (searchYear) params.set("yearSearch", searchYear)
-      if (priceRange[0] > 0) params.set("priceMin", priceRange[0].toString())
-      if (priceRange[1] < 50000000) params.set("priceMax", priceRange[1].toString())
-      if (yearFilter) params.set("year", yearFilter)
-      if (bodyTypeFilter.length) params.set("bodyType", bodyTypeFilter.join(","))
-      if (fuelTypeFilter.length) params.set("fuelType", fuelTypeFilter.join(","))
-      if (colorFilter.length) params.set("color", colorFilter.join(","))
-      if (sortOption !== "createdAt") params.set("sort", sortOption)
-      if (currentPage !== 1) params.set("page", currentPage.toString())
+      const params = new URLSearchParams();
+      if (searchTerm) params.set("search", searchTerm);
+      if (searchYear) params.set("yearSearch", searchYear);
+      if (priceRange[0] > 0) params.set("priceMin", priceRange[0].toString());
+      if (priceRange[1] < 50000000)
+        params.set("priceMax", priceRange[1].toString());
+      if (yearFilter) params.set("year", yearFilter);
+      if (bodyTypeFilter.length)
+        params.set("bodyType", bodyTypeFilter.join(","));
+      if (fuelTypeFilter.length)
+        params.set("fuelType", fuelTypeFilter.join(","));
+      if (colorFilter.length) params.set("color", colorFilter.join(","));
+      if (sortOption !== "createdAt") params.set("sort", sortOption);
+      if (currentPage !== 1) params.set("page", currentPage.toString());
+      if (availabilityFilter) params.set("filter", availabilityFilter);
 
-      router.push(`/cars?${params.toString()}`, { scroll: false })
+      router.push(`/cars?${params.toString()}`, { scroll: false });
     }, 300),
     [
       searchTerm,
@@ -88,19 +134,36 @@ export default function CarsPage() {
       colorFilter,
       sortOption,
       currentPage,
-    ],
-  )
+      availabilityFilter,
+    ]
+  );
 
   // Enhanced search and filtering logic
   const filteredAndSearchedCars = useMemo(() => {
     return cars.filter((car) => {
-      const matchesName = searchTerm ? car.name.toLowerCase().includes(searchTerm.toLowerCase()) : true
-      const matchesSearchYear = searchYear ? car.year.toString().includes(searchYear) : true
-      const matchesPrice = car.price >= priceRange[0] && car.price <= priceRange[1]
-      const matchesYear = yearFilter ? car.year.toString() === yearFilter : true
-      const matchesBodyType = bodyTypeFilter.length ? bodyTypeFilter.includes(car.bodyType) : true
-      const matchesFuelType = fuelTypeFilter.length ? fuelTypeFilter.includes(car.fuelType) : true
-      const matchesColor = colorFilter.length ? colorFilter.includes(car.color) : true
+      const matchesName = searchTerm
+        ? car.name.toLowerCase().includes(searchTerm.toLowerCase())
+        : true;
+      const matchesSearchYear = searchYear
+        ? car.year.toString().includes(searchYear)
+        : true;
+      const matchesPrice =
+        car.price >= priceRange[0] && car.price <= priceRange[1];
+      const matchesYear = yearFilter
+        ? car.year.toString() === yearFilter
+        : true;
+      const matchesBodyType = bodyTypeFilter.length
+        ? bodyTypeFilter.includes(car.bodyType)
+        : true;
+      const matchesFuelType = fuelTypeFilter.length
+        ? fuelTypeFilter.includes(car.fuelType)
+        : true;
+      const matchesColor = colorFilter.length
+        ? colorFilter.includes(car.color)
+        : true;
+      const matchesAvailability = availabilityFilter
+        ? car.availability === availabilityFilter
+        : true;
 
       return (
         matchesName &&
@@ -109,47 +172,69 @@ export default function CarsPage() {
         matchesYear &&
         matchesBodyType &&
         matchesFuelType &&
-        matchesColor
-      )
-    })
-  }, [cars, searchTerm, searchYear, priceRange, yearFilter, bodyTypeFilter, fuelTypeFilter, colorFilter])
+        matchesColor &&
+        matchesAvailability
+      );
+    });
+  }, [
+    cars,
+    searchTerm,
+    searchYear,
+    priceRange,
+    yearFilter,
+    bodyTypeFilter,
+    fuelTypeFilter,
+    colorFilter,
+    availabilityFilter,
+  ]);
 
   // Pagination logic
-  const totalPages = Math.ceil(filteredAndSearchedCars.length / ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(filteredAndSearchedCars.length / ITEMS_PER_PAGE);
   const paginatedCars = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-    const endIndex = startIndex + ITEMS_PER_PAGE
-    return filteredAndSearchedCars.slice(startIndex, endIndex)
-  }, [filteredAndSearchedCars, currentPage])
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredAndSearchedCars.slice(startIndex, endIndex);
+  }, [filteredAndSearchedCars, currentPage]);
 
   // Fetch cars with filters
   useEffect(() => {
-    const filters = {}
+    const filters = {};
     if (priceRange[0] > 0 || priceRange[1] < 50000000) {
-      filters.price = { min: priceRange[0], max: priceRange[1] }
+      filters.price = { min: priceRange[0], max: priceRange[1] };
     }
     if (yearFilter) {
       filters.year = {
         min: Number.parseInt(yearFilter),
         max: Number.parseInt(yearFilter),
-      }
+      };
     }
     if (bodyTypeFilter.length) {
-      filters.bodyType = bodyTypeFilter.join(",")
+      filters.bodyType = bodyTypeFilter.join(",");
     }
     if (fuelTypeFilter.length) {
-      filters.fuelType = fuelTypeFilter.join(",")
+      filters.fuelType = fuelTypeFilter.join(",");
     }
     if (colorFilter.length) {
-      filters.color = colorFilter.join(",")
+      filters.color = colorFilter.join(",");
+    }
+    if (availabilityFilter) {
+      filters.availability = availabilityFilter;
     }
 
-    getCars({ page: 1, limit: 100, sort: sortOption, filters })
-  }, [priceRange, yearFilter, bodyTypeFilter, fuelTypeFilter, colorFilter, sortOption])
+    getCars({ page: 1, limit: 100, sort: sortOption, filters });
+  }, [
+    priceRange,
+    yearFilter,
+    bodyTypeFilter,
+    fuelTypeFilter,
+    colorFilter,
+    sortOption,
+    availabilityFilter,
+  ]);
 
   // Update URL when filters change
   useEffect(() => {
-    updateURL()
+    updateURL();
   }, [
     searchTerm,
     searchYear,
@@ -160,68 +245,91 @@ export default function CarsPage() {
     colorFilter,
     sortOption,
     currentPage,
+    availabilityFilter,
     updateURL,
-  ])
+  ]);
 
   // Reset current page when filters change
   useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm, searchYear, priceRange, yearFilter, bodyTypeFilter, fuelTypeFilter, colorFilter])
+    setCurrentPage(1);
+  }, [
+    searchTerm,
+    searchYear,
+    priceRange,
+    yearFilter,
+    bodyTypeFilter,
+    fuelTypeFilter,
+    colorFilter,
+    availabilityFilter,
+  ]);
 
   // Toggle filter functions
   const toggleBodyTypeFilter = (value) => {
-    setBodyTypeFilter((prev) => (prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]))
-  }
+    setBodyTypeFilter((prev) =>
+      prev.includes(value)
+        ? prev.filter((item) => item !== value)
+        : [...prev, value]
+    );
+  };
 
   const toggleFuelTypeFilter = (value) => {
-    setFuelTypeFilter((prev) => (prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]))
-  }
+    setFuelTypeFilter((prev) =>
+      prev.includes(value)
+        ? prev.filter((item) => item !== value)
+        : [...prev, value]
+    );
+  };
 
   const toggleColorFilter = (value) => {
-    setColorFilter((prev) => (prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]))
-  }
+    setColorFilter((prev) =>
+      prev.includes(value)
+        ? prev.filter((item) => item !== value)
+        : [...prev, value]
+    );
+  };
 
   // Reset filters
   const resetFilters = () => {
-    setSearchTerm("")
-    setSearchYear("")
-    setPriceRange([0, 50000000])
-    setYearFilter("")
-    setBodyTypeFilter([])
-    setFuelTypeFilter([])
-    setColorFilter([])
-    setSortOption("createdAt")
-    setCurrentPage(1)
-  }
+    setSearchTerm("");
+    setSearchYear("");
+    setPriceRange([0, 50000000]);
+    setYearFilter("");
+    setBodyTypeFilter([]);
+    setFuelTypeFilter([]);
+    setColorFilter([]);
+    setSortOption("createdAt");
+    setCurrentPage(1);
+    setAvailabilityFilter("available");
+  };
 
   // Handle page change
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page)
-      window.scrollTo({ top: 0, behavior: "smooth" })
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  }
+  };
 
   // Generate page numbers for pagination
   const getPageNumbers = () => {
-    const pages = []
-    const maxVisiblePages = 5
+    const pages = [];
+    const maxVisiblePages = 5;
 
     if (totalPages <= maxVisiblePages) {
       for (let i = 1; i <= totalPages; i++) {
-        pages.push(i)
+        pages.push(i);
       }
     } else {
-      const start = Math.max(1, currentPage - 2)
-      const end = Math.min(totalPages, start + maxVisiblePages - 1)
+      const start = Math.max(1, currentPage - 2);
+      const end = Math.min(totalPages, start + maxVisiblePages - 1);
 
       for (let i = start; i <= end; i++) {
-        pages.push(i)
+        pages.push(i);
       }
     }
 
-    return pages
-  }
+    return pages;
+  };
 
   // Skeleton Loading Component
   const SkeletonCard = () => (
@@ -240,7 +348,7 @@ export default function CarsPage() {
         <Skeleton className="h-11 w-full" />
       </CardContent>
     </Card>
-  )
+  );
 
   // Active filters count
   const activeFiltersCount = [
@@ -251,7 +359,8 @@ export default function CarsPage() {
     ...fuelTypeFilter,
     ...colorFilter,
     priceRange[0] > 0 || priceRange[1] < 50000000 ? "price" : null,
-  ].filter(Boolean).length
+    availabilityFilter !== "available" ? "availability" : null,
+  ].filter(Boolean).length;
 
   return (
     <div className="min-h-screen bg-gray-50 mt-10 md:mt-0">
@@ -261,12 +370,14 @@ export default function CarsPage() {
           <div className="flex flex-col lg:flex-row justify-between items-start gap-6 lg:gap-8">
             <div className="flex-1">
               <div className="mb-4">
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-2">Car Collection</h1>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-2">
+                  Car Collection
+                </h1>
                 <div className="h-1 w-20 bg-emerald-500 rounded-full" />
               </div>
               <p className="text-base sm:text-lg text-gray-600 max-w-2xl leading-relaxed mb-4">
-                Discover our curated selection of exceptional vehicles, each one carefully chosen for quality,
-                performance, and luxury.
+                Discover our curated selection of exceptional vehicles, each one
+                carefully chosen for quality, performance, and luxury.
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <div className="px-4 py-2 bg-gray-100 rounded-full">
@@ -276,7 +387,8 @@ export default function CarsPage() {
                 </div>
                 {activeFiltersCount > 0 && (
                   <div className="px-3 py-1 bg-emerald-500 text-white rounded-full text-sm font-medium">
-                    {activeFiltersCount} Filter{activeFiltersCount > 1 ? "s" : ""} Active
+                    {activeFiltersCount} Filter
+                    {activeFiltersCount > 1 ? "s" : ""} Active
                   </div>
                 )}
               </div>
@@ -334,7 +446,9 @@ export default function CarsPage() {
                       <span className="hidden sm:inline">Advanced Filters</span>
                       <span className="sm:hidden">Filters</span>
                       {activeFiltersCount > 0 && (
-                        <Badge className="ml-2 bg-emerald-500 hover:bg-emerald-600">{activeFiltersCount}</Badge>
+                        <Badge className="ml-2 bg-emerald-500 hover:bg-emerald-600">
+                          {activeFiltersCount}
+                        </Badge>
                       )}
                     </Button>
                   </SheetTrigger>
@@ -347,10 +461,16 @@ export default function CarsPage() {
                     </SheetHeader>
 
                     <div className="space-y-6">
-                      <Accordion type="multiple" className="w-full" defaultValue={["price"]}>
+                      <Accordion
+                        type="multiple"
+                        className="w-full"
+                        defaultValue={["price"]}
+                      >
                         {/* Price Range Filter */}
                         <AccordionItem value="price">
-                          <AccordionTrigger className="text-base font-medium">💰 Price Range</AccordionTrigger>
+                          <AccordionTrigger className="text-base font-medium">
+                            💰 Price Range
+                          </AccordionTrigger>
                           <AccordionContent className="pt-4">
                             <div className="space-y-4">
                               <div className="flex justify-between text-sm font-medium text-gray-600">
@@ -376,14 +496,22 @@ export default function CarsPage() {
                             Model Year
                           </AccordionTrigger>
                           <AccordionContent className="pt-4">
-                            <Select value={yearFilter} onValueChange={(val) => setYearFilter(val === "any" ? "" : val)}>
+                            <Select
+                              value={yearFilter}
+                              onValueChange={(val) =>
+                                setYearFilter(val === "any" ? "" : val)
+                              }
+                            >
                               <SelectTrigger>
                                 <SelectValue placeholder="Select year" />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="any">Any Year</SelectItem>
                                 {uniqueYears.map((year) => (
-                                  <SelectItem key={year} value={year.toString()}>
+                                  <SelectItem
+                                    key={year}
+                                    value={year.toString()}
+                                  >
                                     {year}
                                   </SelectItem>
                                 ))}
@@ -401,14 +529,22 @@ export default function CarsPage() {
                           <AccordionContent className="pt-4">
                             <div className="space-y-3">
                               {uniqueBodyTypes.map((type) => (
-                                <div key={type} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50">
+                                <div
+                                  key={type}
+                                  className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50"
+                                >
                                   <Checkbox
                                     id={`body-${type}`}
                                     checked={bodyTypeFilter.includes(type)}
-                                    onCheckedChange={() => toggleBodyTypeFilter(type)}
+                                    onCheckedChange={() =>
+                                      toggleBodyTypeFilter(type)
+                                    }
                                     className="data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                                   />
-                                  <Label htmlFor={`body-${type}`} className="text-sm font-medium cursor-pointer">
+                                  <Label
+                                    htmlFor={`body-${type}`}
+                                    className="text-sm font-medium cursor-pointer"
+                                  >
                                     {type}
                                   </Label>
                                 </div>
@@ -426,14 +562,22 @@ export default function CarsPage() {
                           <AccordionContent className="pt-4">
                             <div className="space-y-3">
                               {uniqueFuelTypes.map((type) => (
-                                <div key={type} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50">
+                                <div
+                                  key={type}
+                                  className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50"
+                                >
                                   <Checkbox
                                     id={`fuel-${type}`}
                                     checked={fuelTypeFilter.includes(type)}
-                                    onCheckedChange={() => toggleFuelTypeFilter(type)}
+                                    onCheckedChange={() =>
+                                      toggleFuelTypeFilter(type)
+                                    }
                                     className="data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                                   />
-                                  <Label htmlFor={`fuel-${type}`} className="text-sm font-medium cursor-pointer">
+                                  <Label
+                                    htmlFor={`fuel-${type}`}
+                                    className="text-sm font-medium cursor-pointer"
+                                  >
                                     {type}
                                   </Label>
                                 </div>
@@ -458,10 +602,15 @@ export default function CarsPage() {
                                   <Checkbox
                                     id={`color-${color}`}
                                     checked={colorFilter.includes(color)}
-                                    onCheckedChange={() => toggleColorFilter(color)}
+                                    onCheckedChange={() =>
+                                      toggleColorFilter(color)
+                                    }
                                     className="data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                                   />
-                                  <Label htmlFor={`color-${color}`} className="text-sm font-medium cursor-pointer">
+                                  <Label
+                                    htmlFor={`color-${color}`}
+                                    className="text-sm font-medium cursor-pointer"
+                                  >
                                     {color}
                                   </Label>
                                 </div>
@@ -471,7 +620,11 @@ export default function CarsPage() {
                         </AccordionItem>
                       </Accordion>
 
-                      <Button variant="outline" className="w-full mt-8 h-11 bg-transparent" onClick={resetFilters}>
+                      <Button
+                        variant="outline"
+                        className="w-full mt-8 h-11 bg-transparent"
+                        onClick={resetFilters}
+                      >
                         <X className="h-4 w-4 mr-2" />
                         Reset All Filters
                       </Button>
@@ -480,10 +633,34 @@ export default function CarsPage() {
                 </Sheet>
 
                 {activeFiltersCount > 0 && (
-                  <Button variant="ghost" className="h-12 px-4 text-gray-500 hover:bg-gray-50" onClick={resetFilters}>
+                  <Button
+                    variant="ghost"
+                    className="h-12 px-4 text-gray-500 hover:bg-gray-50"
+                    onClick={resetFilters}
+                  >
                     <X className="h-4 w-4" />
                   </Button>
                 )}
+              </div>
+
+              {/* Availability Filter Buttons */}
+              <div className="flex flex-wrap gap-2">
+                {["available", "upcoming", "unavailable"].map((status) => (
+                  <Button
+                    key={status}
+                    variant={
+                      availabilityFilter === status ? "default" : "outline"
+                    }
+                    className={`h-10 px-4 capitalize ${
+                      availabilityFilter === status
+                        ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                        : "border-gray-300 hover:bg-gray-50 text-gray-700"
+                    }`}
+                    onClick={() => setAvailabilityFilter(status)}
+                  >
+                    {status}
+                  </Button>
+                ))}
               </div>
             </div>
           </div>
@@ -504,10 +681,14 @@ export default function CarsPage() {
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <X className="h-8 w-8 text-red-500" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Something went wrong</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Something went wrong
+              </h3>
               <p className="text-gray-600 mb-6">{error}</p>
               <Button
-                onClick={() => getCars({ page: 1, limit: 100, sort: sortOption })}
+                onClick={() =>
+                  getCars({ page: 1, limit: 100, sort: sortOption })
+                }
                 className="bg-emerald-600 hover:bg-emerald-700"
               >
                 Try Again
@@ -520,11 +701,17 @@ export default function CarsPage() {
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="h-8 w-8 text-gray-500" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No vehicles found</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No vehicles found
+              </h3>
               <p className="text-gray-600 mb-6">
-                Try adjusting your search criteria or filters to discover our car collection.
+                Try adjusting your search criteria or filters to discover our
+                car collection.
               </p>
-              <Button onClick={resetFilters} className="bg-emerald-600 hover:bg-emerald-700">
+              <Button
+                onClick={resetFilters}
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
                 Clear All Filters
               </Button>
             </div>
@@ -538,7 +725,15 @@ export default function CarsPage() {
                   const image =
                     car.images?.find((img) => img.isPrimary)?.url ||
                     car.images?.[0]?.url ||
-                    "/placeholder.svg?height=600&width=800"
+                    "/placeholder.svg?height=600&width=800";
+
+                  // Determine badge color based on availability
+                  const availabilityBadgeClass =
+                    car.availability === "available"
+                      ? "bg-green-500 hover:bg-green-600"
+                      : car.availability === "upcoming"
+                      ? "bg-yellow-500 hover:bg-yellow-600"
+                      : "bg-red-500 hover:bg-red-600";
 
                   return (
                     <motion.div
@@ -577,20 +772,38 @@ export default function CarsPage() {
                             </p>
                           </div>
 
-                          <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4 sm:mb-6">
+                          <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
                             <div className="text-center p-2 bg-gray-50 rounded-lg">
-                              <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">Year</p>
-                              <p className="text-sm font-semibold text-gray-900">{car.year}</p>
+                              <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+                                Year
+                              </p>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {car.year}
+                              </p>
                             </div>
                             <div className="text-center p-2 bg-gray-50 rounded-lg">
-                              <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">Mileage</p>
-                              <p className="text-sm font-semibold text-gray-900">{car.mileage.toLocaleString()}</p>
+                              <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+                                Mileage
+                              </p>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {car.mileage.toLocaleString()}
+                              </p>
                             </div>
                             <div className="text-center p-2 bg-gray-50 rounded-lg">
-                              <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">Fuel</p>
-                              <p className="text-sm font-semibold text-gray-900">{car.fuelType}</p>
+                              <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+                                Fuel
+                              </p>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {car.fuelType}
+                              </p>
                             </div>
                           </div>
+
+                          <Badge
+                            className={`text-center mb-3 capitalize ${availabilityBadgeClass} text-white font-medium`}
+                          >
+                            {car.availability}
+                          </Badge>
 
                           <Button
                             asChild
@@ -604,7 +817,7 @@ export default function CarsPage() {
                         </CardContent>
                       </Card>
                     </motion.div>
-                  )
+                  );
                 })}
               </AnimatePresence>
             </div>
@@ -614,8 +827,11 @@ export default function CarsPage() {
               <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mt-12 pt-8 border-t border-gray-200">
                 <div className="text-sm text-gray-600 bg-white px-4 py-2 rounded-lg shadow-sm border">
                   Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{" "}
-                  {Math.min(currentPage * ITEMS_PER_PAGE, filteredAndSearchedCars.length)} of{" "}
-                  {filteredAndSearchedCars.length} vehicles
+                  {Math.min(
+                    currentPage * ITEMS_PER_PAGE,
+                    filteredAndSearchedCars.length
+                  )}{" "}
+                  of {filteredAndSearchedCars.length} vehicles
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -634,7 +850,9 @@ export default function CarsPage() {
                     {getPageNumbers().map((pageNum) => (
                       <Button
                         key={pageNum}
-                        variant={currentPage === pageNum ? "default" : "outline"}
+                        variant={
+                          currentPage === pageNum ? "default" : "outline"
+                        }
                         size="sm"
                         onClick={() => handlePageChange(pageNum)}
                         className={
@@ -665,9 +883,11 @@ export default function CarsPage() {
         )}
       </div>
     </div>
-  )
+  );
 }
 
 function getSlug(car) {
-  return `${car.name}-${car.year}-${car._id}`.toLowerCase().replace(/\s+/g, "-")
+  return `${car.name}-${car.year}-${car._id}`
+    .toLowerCase()
+    .replace(/\s+/g, "-");
 }

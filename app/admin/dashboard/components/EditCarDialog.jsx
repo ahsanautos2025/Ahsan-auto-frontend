@@ -36,6 +36,11 @@ export default function EditCarDialog({
   uploadVideo,
   deleteVideo,
 }) {
+  const normalizeAvailability = (value) => {
+    const valid = ["available", "unavailable", "upcoming"];
+    return valid.includes(value) ? value : "available";
+  };
+
   const [carData, setCarData] = useState(
     currentCar
       ? {
@@ -51,7 +56,7 @@ export default function EditCarDialog({
                 .toISOString()
                 .slice(0, 7) // Format YYYY-MM
             : "",
-          availability: currentCar.availability || "In Stock",
+          availability: normalizeAvailability(currentCar.availability),
         }
       : null
   );
@@ -86,7 +91,7 @@ export default function EditCarDialog({
         expectedDeliveryTime: currentCar.expectedDeliveryTime
           ? new Date(currentCar.expectedDeliveryTime).toISOString().slice(0, 7)
           : "",
-        availability: currentCar.availability || "In Stock",
+        availability: normalizeAvailability(currentCar.availability),
       });
       setImageUpdates(
         currentCar?.images?.map((img) => ({
@@ -111,25 +116,25 @@ export default function EditCarDialog({
   };
 
   const handleImageMetadataChange = (imageId, field, value) => {
-    setImageUpdates((prev) => {
-      let updates = prev.map((update) =>
-        update.imageId === imageId
-          ? { ...update, [field]: field === "isPrimary" ? !update.isPrimary : value }
-          : field === "isPrimary" && value
-          ? { ...update, isPrimary: false } // Deselect others if setting one as primary
-          : update
-      );
-
-      if (!prev.find((u) => u.imageId === imageId)) {
-        return [
-          ...prev,
-          { imageId, alt: "", isPrimary: field === "isPrimary" ? value : false },
-        ];
-      }
-
-      return updates;
-    });
-  };
+  if (field === "isPrimary") {
+    // Update the images in carData directly
+    setCarData(prev => ({
+      ...prev,
+      images: prev.images.map(img => ({
+        ...img,
+        isPrimary: img._id === imageId ? value : false
+      }))
+    }));
+  } else {
+    // Handle alt text updates
+    setCarData(prev => ({
+      ...prev,
+      images: prev.images.map(img =>
+        img._id === imageId ? { ...img, [field]: value } : img
+      )
+    }));
+  }
+};
 
   const handleDeleteImage = async (imageId) => {
     try {
@@ -167,8 +172,9 @@ export default function EditCarDialog({
         horsepower: carData.horsepower ? Number(carData.horsepower) : 0,
         features: updatedFeatures,
         expectedDeliveryTime: carData.expectedDeliveryTime
-          ? new Date(carData.expectedDeliveryTime + "-01") // Append day for valid date
+          ? new Date(carData.expectedDeliveryTime + "-01")
           : null,
+        availability: normalizeAvailability(carData.availability), // <-- Ensure valid value
       };
 
       const response = await updateCar(_id, updatedCarData);
@@ -414,8 +420,9 @@ export default function EditCarDialog({
                   <SelectValue placeholder="Select availability" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="In Stock">In Stock</SelectItem>
-                  <SelectItem value="Out of Stock">Out of Stock</SelectItem>
+                  <SelectItem value="available">Available</SelectItem>
+                  <SelectItem value="unavailable">Unavailable</SelectItem>
+                  <SelectItem value="upcoming">Upcoming</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -444,65 +451,47 @@ export default function EditCarDialog({
             <div className="space-y-2">
               <Label>Existing Images</Label>
               <div className="grid grid-cols-2 gap-4">
-                {carData.images.map((image) => {
-                  const update = imageUpdates.find(
-                    (u) => u.imageId === image._id
-                  ) || {
-                    alt: image.alt || "",
-                    isPrimary: image.isPrimary || false,
-                  };
-                  return (
-                    <div key={image._id} className="border rounded-md p-2">
-                      <Image
-                        src={image.url}
-                        width={100}
-                        height={100}
-                        alt={image.alt || "Car image"}
-                        className="w-full h-24 object-cover rounded-md mb-2"
+                {carData.images.map((image) => (
+                  <div key={image._id} className="border rounded-md p-2">
+                    <Image
+                      src={image.url}
+                      width={100}
+                      height={100}
+                      alt={image.alt || "Car image"}
+                      className="w-full h-24 object-cover rounded-md mb-2"
+                    />
+                    <div className="space-y-2">
+                      <Input
+                        placeholder="Alt text"
+                        value={image.alt || ""}
+                        onChange={(e) =>
+                          handleImageMetadataChange(image._id, "alt", e.target.value)
+                        }
                       />
-                      <div className="space-y-2">
-                        <Input
-                          placeholder="Alt text"
-                          value={update.alt}
-                          onChange={(e) =>
-                            handleImageMetadataChange(
-                              image._id,
-                              "alt",
-                              e.target.value
-                            )
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={`primary-${image._id}`}
+                          checked={image.isPrimary}
+                          onChange={() =>
+                            handleImageMetadataChange(image._id, "isPrimary", !image.isPrimary)
                           }
+                          className="h-4 w-4 rounded border-gray-300 text-[#245dc7] focus:ring-[#245dc7]"
                         />
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            id={`primary-${image._id}`}
-                            checked={update.isPrimary}
-                            onChange={() =>
-                              handleImageMetadataChange(
-                                image._id,
-                                "isPrimary",
-                                !update.isPrimary
-                              )
-                            }
-                            className="h-4 w-4 rounded border-gray-300 text-[#245dc7] focus:ring-[#245dc7]"
-                          />
-                          <Label htmlFor={`primary-${image._id}`}>
-                            Primary
-                          </Label>
-                        </div>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="w-full"
-                          onClick={() => handleDeleteImage(image._id)}
-                        >
-                          <Trash className="h-4 w-4 mr-1" />
-                          Delete
-                        </Button>
+                        <Label htmlFor={`primary-${image._id}`}>Primary</Label>
                       </div>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => handleDeleteImage(image._id)}
+                      >
+                        <Trash className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             </div>
           )}

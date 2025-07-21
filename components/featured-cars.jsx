@@ -13,27 +13,16 @@ import { motion, AnimatePresence } from "framer-motion"
 
 export default function FeaturedCars() {
   const { featuredCars, getFeaturedCars, loading, error } = useCars()
-  const [currentPage, setCurrentPage] = useState(0)
   const carsPerPage = 4
 
-  const totalPages = Math.ceil(featuredCars.length / carsPerPage)
   useEffect(() => {
     getFeaturedCars()
   }, [])
 
-  const displayedCars = featuredCars.slice(currentPage * carsPerPage, (currentPage + 1) * carsPerPage)
-
-  const nextPage = () => {
-    setCurrentPage((prev) => (prev + 1) % totalPages)
-  }
-
-  const prevPage = () => {
-    setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages)
-  }
-
-  const goToPage = (pageIndex) => {
-    setCurrentPage(pageIndex)
-  }
+  // Filter cars by availability
+  const availableCars = featuredCars.filter((car) => car.availability === "available")
+  const upcomingCars = featuredCars.filter((car) => car.availability === "upcoming")
+  const unavailableCars = featuredCars.filter((car) => car.availability === "unavailable")
 
   // Loading skeleton component
   const SkeletonCard = () => (
@@ -53,6 +42,203 @@ export default function FeaturedCars() {
       </CardContent>
     </Card>
   )
+
+  // Reusable section component
+  const CarSection = ({ title, cars, sectionKey }) => {
+    const [currentPage, setCurrentPage] = useState(0)
+    const totalPages = Math.ceil(cars.length / carsPerPage)
+    const displayedCars = cars.slice(currentPage * carsPerPage, (currentPage + 1) * carsPerPage)
+
+    const nextPage = () => {
+      setCurrentPage((prev) => (prev + 1) % totalPages)
+    }
+
+    const prevPage = () => {
+      setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages)
+    }
+
+    const goToPage = (pageIndex) => {
+      setCurrentPage(pageIndex)
+    }
+
+    if (cars.length === 0) {
+      return (
+        <div className="mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-8"
+          >
+            <div className="inline-block mb-4">
+              <span className="px-4 py-2 bg-emerald-100 text-black rounded-full text-sm font-medium">
+                {title}
+              </span>
+            </div>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              No {title.toLowerCase()} vehicles at the moment. Check back soon!
+            </p>
+          </motion.div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="text-center mb-8"
+        >
+          <div className="inline-block mb-4">
+            <span className="px-4 py-2 bg-emerald-100 text-black rounded-full text-sm font-medium">
+              {title}
+            </span>
+          </div>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            {title === "Available"
+              ? "Ready for immediate purchase"
+              : title === "Upcoming"
+              ? "Coming soon to our collection"
+              : "Currently not available"}
+          </p>
+        </motion.div>
+
+        {totalPages > 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="flex justify-center items-center gap-4 mb-12"
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={prevPage}
+              className="h-12 w-12 rounded-full bg-white shadow-lg hover:shadow-xl border border-emerald-100 hover:border-emerald-200 text-emerald-600 hover:bg-emerald-50 transition-all duration-300"
+              disabled={totalPages <= 1}
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </Button>
+            <div className="flex items-center gap-2">
+              {Array.from({ length: totalPages }, (_, index) => (
+                <button
+                  key={`${sectionKey}-page-${index}`}
+                  onClick={() => goToPage(index)}
+                  className={`transition-all duration-300 ${
+                    currentPage === index
+                      ? "w-8 h-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"
+                      : "w-2 h-2 bg-gray-300 hover:bg-emerald-300 rounded-full"
+                  }`}
+                />
+              ))}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={nextPage}
+              className="h-12 w-12 rounded-full bg-white shadow-lg hover:shadow-xl border border-emerald-100 hover:border-emerald-200 text-emerald-600 hover:bg-emerald-50 transition-all duration-300"
+              disabled={totalPages <= 1}
+            >
+              <ChevronRight className="h-6 w-6" />
+            </Button>
+          </motion.div>
+        )}
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`${sectionKey}-${currentPage}`}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            transition={{ duration: 0.5 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+          >
+            {displayedCars.map((car, index) => {
+              const primaryImage = car.images?.find((img) => img.isPrimary)
+              const fallbackImage = car.images?.[0]
+              const imageUrl = primaryImage?.url || fallbackImage?.url || "/placeholder.svg?height=600&width=800"
+              const imageAlt = primaryImage?.alt || fallbackImage?.alt || car.name
+
+              return (
+                <motion.div
+                  key={car._id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <Card className="group overflow-hidden hover:shadow-2xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm">
+                    <div className="relative h-64 overflow-hidden">
+                      <Image
+                        src={imageUrl}
+                        alt={imageAlt}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <Badge className="absolute top-4 right-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-medium shadow-lg border-0">
+                        Featured
+                      </Badge>
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                        <Button
+                          asChild
+                          size="sm"
+                          className="bg-white/90 text-black hover:bg-white rounded-full px-6 shadow-lg backdrop-blur-sm"
+                        >
+                          <Link href={`/cars/${car._id}`} className="flex items-center gap-2">
+                            <Eye className="h-4 w-4" />
+                            View Details
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <h3 className="text-lg font-bold text-gray-900 line-clamp-1 group-hover:text-black transition-colors duration-300">
+                          {car.name}
+                        </h3>
+                        <p className="text-lg font-bold text-transparent bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text ml-2 whitespace-nowrap">
+                          ৳{car.price.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4 mb-6">
+                        <div className="text-center p-3 bg-emerald-50 rounded-xl">
+                          <Calendar className="h-5 w-5 text-emerald-600 mx-auto mb-1" />
+                          <p className="text-xs font-medium text-black uppercase tracking-wide">Year</p>
+                          <p className="text-sm font-bold text-gray-900">{car.year}</p>
+                        </div>
+                        <div className="text-center p-3 bg-teal-50 rounded-xl">
+                          <Gauge className="h-5 w-5 text-teal-600 mx-auto mb-1" />
+                          <p className="text-xs font-medium text-teal-700 uppercase tracking-wide">Miles</p>
+                          <p className="text-sm font-bold text-gray-900">{car.mileage.toLocaleString()}</p>
+                        </div>
+                        <div className="text-center p-3 bg-emerald-50 rounded-xl">
+                          <Settings className="h-5 w-5 text-emerald-600 mx-auto mb-1" />
+                          <p className="text-xs font-medium text-black uppercase tracking-wide">Trans</p>
+                          <p className="text-sm font-bold text-gray-900">{car.transmission}</p>
+                        </div>
+                      </div>
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="w-full font-semibold transition-all duration-300 group-hover:scale-105 border-emerald-500 hover:border-teal-500 text-emerald-600 hover:text-teal-600 shadow-sm hover:shadow-md"
+                      >
+                        <Link href={`/cars/${getSlug(car)}`}>Explore Vehicle</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )
+            })}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    )
+  }
 
   if (loading) {
     return (
@@ -119,173 +305,10 @@ export default function FeaturedCars() {
   return (
     <section className="py-20 bg-gradient-to-br from-slate-50 via-emerald-50/30 to-slate-100">
       <div className="container mx-auto px-6">
-        {/* Header Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <div className="inline-block mb-4">
-            <span className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium">
-              Featured Collection
-            </span>
-          </div>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Handpicked vehicles that represent the pinnacle of automotive excellence
-          </p>
-        </motion.div>
+        <CarSection title="Available" cars={availableCars} sectionKey="available" />
+        <CarSection title="Upcoming" cars={upcomingCars} sectionKey="upcoming" />
+        <CarSection title="Unavailable" cars={unavailableCars} sectionKey="unavailable" />
 
-        {/* Navigation Controls */}
-        {totalPages > 1 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="flex justify-center items-center gap-4 mb-12"
-          >
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={prevPage}
-              className="h-12 w-12 rounded-full bg-white shadow-lg hover:shadow-xl border border-emerald-100 hover:border-emerald-200 text-emerald-600 hover:bg-emerald-50 transition-all duration-300"
-              disabled={totalPages <= 1}
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </Button>
-
-            {/* Page Indicators */}
-            <div className="flex items-center gap-2">
-              {Array.from({ length: totalPages }, (_, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToPage(index)}
-                  className={`transition-all duration-300 ${
-                    currentPage === index
-                      ? "w-8 h-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"
-                      : "w-2 h-2 bg-gray-300 hover:bg-emerald-300 rounded-full"
-                  }`}
-                />
-              ))}
-            </div>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={nextPage}
-              className="h-12 w-12 rounded-full bg-white shadow-lg hover:shadow-xl border border-emerald-100 hover:border-emerald-200 text-emerald-600 hover:bg-emerald-50 transition-all duration-300"
-              disabled={totalPages <= 1}
-            >
-              <ChevronRight className="h-6 w-6" />
-            </Button>
-          </motion.div>
-        )}
-
-        {/* Cars Grid */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentPage}
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
-            transition={{ duration: 0.5 }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
-          >
-            {displayedCars.map((car, index) => {
-              const primaryImage = car.images?.find((img) => img.isPrimary)
-              const fallbackImage = car.images?.[0]
-              const imageUrl = primaryImage?.url || fallbackImage?.url || "/placeholder.svg?height=600&width=800"
-              const imageAlt = primaryImage?.alt || fallbackImage?.alt || car.name
-
-              return (
-                <motion.div
-                  key={car._id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  <Card className="group overflow-hidden hover:shadow-2xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm">
-                    {/* Image Container */}
-                    <div className="relative h-64 overflow-hidden">
-                      <Image
-                        src={imageUrl || "/placeholder.svg"}
-                        alt={imageAlt}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-
-                      {/* Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                      {/* Featured Badge */}
-                      <Badge className="absolute top-4 right-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-medium shadow-lg border-0">
-                        Featured
-                      </Badge>
-
-                      {/* View Details Button */}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                        <Button
-                          asChild
-                          size="sm"
-                          className="bg-white/90 text-emerald-700 hover:bg-white rounded-full px-6 shadow-lg backdrop-blur-sm"
-                        >
-                          <Link href={`/cars/${car._id}`} className="flex items-center gap-2">
-                            <Eye className="h-4 w-4" />
-                            View Details
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
-
-                    <CardContent className="p-6">
-                      {/* Title and Price */}
-                      <div className="flex justify-between items-start mb-4">
-                        <h3 className="text-lg font-bold text-gray-900 line-clamp-1 group-hover:text-emerald-700 transition-colors duration-300">
-                          {car.name}
-                        </h3>
-                        <p className="text-lg font-bold text-transparent bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text ml-2 whitespace-nowrap">
-                          ৳{car.price.toLocaleString()}
-                        </p>
-                      </div>
-
-                      {/* Car Details */}
-                      <div className="grid grid-cols-3 gap-4 mb-6">
-                        <div className="text-center p-3 bg-emerald-50 rounded-xl">
-                          <Calendar className="h-5 w-5 text-emerald-600 mx-auto mb-1" />
-                          <p className="text-xs font-medium text-emerald-700 uppercase tracking-wide">Year</p>
-                          <p className="text-sm font-bold text-gray-900">{car.year}</p>
-                        </div>
-                        <div className="text-center p-3 bg-teal-50 rounded-xl">
-                          <Gauge className="h-5 w-5 text-teal-600 mx-auto mb-1" />
-                          <p className="text-xs font-medium text-teal-700 uppercase tracking-wide">Miles</p>
-                          <p className="text-sm font-bold text-gray-900">{car.mileage.toLocaleString()}</p>
-                        </div>
-                        <div className="text-center p-3 bg-emerald-50 rounded-xl">
-                          <Settings className="h-5 w-5 text-emerald-600 mx-auto mb-1" />
-                          <p className="text-xs font-medium text-emerald-700 uppercase tracking-wide">Trans</p>
-                          <p className="text-sm font-bold text-gray-900">{car.transmission}</p>
-                        </div>
-                      </div>
-
-                      {/* CTA Button */}
-                      <Button
-                        asChild
-                        variant="outline"
-                        className="w-full font-semibold transition-all duration-300 group-hover:scale-105 border-emerald-500 hover:border-teal-500 text-emerald-600 hover:text-teal-600 shadow-sm hover:shadow-md"
-                      >
-                        <Link href={`/cars/${getSlug(car)}`}>Explore Vehicle</Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )
-            })}
-          </motion.div>
-        </AnimatePresence>
-
-        {/* View All Button */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -308,7 +331,6 @@ export default function FeaturedCars() {
     </section>
   )
 }
-
 
 function getSlug(car) {
   return `${car.name}-${car.year}-${car._id}`.toLowerCase().replace(/\s+/g, "-")

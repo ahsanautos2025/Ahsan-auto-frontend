@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   Calendar,
@@ -27,10 +27,16 @@ import {
   Shield,
   Clock,
   Play,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+  ArrowDown,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   Dialog,
   DialogContent,
@@ -38,47 +44,55 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { useCars } from "@/Context/CarContext"
-import { useEnquiry } from "@/Context/EnquiryContext"
-import { useSettings } from "@/Context/SettingsContext"
-import { toast } from "sonner"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { useCars } from "@/Context/CarContext";
+import { useEnquiry } from "@/Context/EnquiryContext";
+import { useSettings } from "@/Context/SettingsContext";
+import { toast } from "sonner";
 
 export default function CarDetails({ slugAndId }) {
-  const id = slugAndId.split("-").pop()
-  const { currentCar, getCarById, loading, error } = useCars()
-  const { createEnquiry, loading: enquiryLoading, error: enquiryError } = useEnquiry()
-  const { settings, loading: settingsLoading, error: settingsError } = useSettings()
+  const id = slugAndId.split("-").pop();
+  const { currentCar, getCarById, loading, error } = useCars();
+  const {
+    createEnquiry,
+    loading: enquiryLoading,
+    error: enquiryError,
+  } = useEnquiry();
+  const {
+    settings,
+    loading: settingsLoading,
+    error: settingsError,
+  } = useSettings();
 
-  const [activeImage, setActiveImage] = useState(0)
-  const [isLiked, setIsLiked] = useState(false)
-  const [isGalleryOpen, setIsGalleryOpen] = useState(false)
-  const [galleryActiveImage, setGalleryActiveImage] = useState(0)
+  const [activeImage, setActiveImage] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [galleryActiveImage, setGalleryActiveImage] = useState(0);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     message: "",
-  })
+  });
 
   // Fetch car by ID on mount
   useEffect(() => {
     if (id) {
-      getCarById(id)
+      getCarById(id);
     }
-  }, [id])
+  }, [id]);
 
   // Create gallery array with video first if it exists
   const createGallery = () => {
-    const images = currentCar?.images || []
-    const primaryImage = images.find((img) => img.isPrimary)
-    const otherImages = images.filter((img) => !img.isPrimary)
-    const imageGallery = primaryImage ? [primaryImage, ...otherImages] : images
+    const images = currentCar?.images || [];
+    const primaryImage = images.find((img) => img.isPrimary);
+    const otherImages = images.filter((img) => !img.isPrimary);
+    const imageGallery = primaryImage ? [primaryImage, ...otherImages] : images;
 
     // If video exists, add it as the first item
     if (currentCar?.videoUrl) {
@@ -89,47 +103,59 @@ export default function CarDetails({ slugAndId }) {
           alt: `${currentCar.name} video`,
           isVideo: true,
         },
-        ...imageGallery.map((img) => ({ ...img, type: "image", isVideo: false })),
-      ]
+        ...imageGallery.map((img) => ({
+          ...img,
+          type: "image",
+          isVideo: false,
+        })),
+      ];
     }
 
     return imageGallery.length > 0
       ? imageGallery.map((img) => ({ ...img, type: "image", isVideo: false }))
-      : [{ type: "image", url: "/placeholder.svg?height=600&width=800", alt: "Placeholder", isVideo: false }]
-  }
+      : [
+          {
+            type: "image",
+            url: "/placeholder.svg?height=600&width=800",
+            alt: "Placeholder",
+            isVideo: false,
+          },
+        ];
+  };
 
-  const gallery = createGallery()
+  const gallery = createGallery();
 
   // Auto-slide through gallery (only for images, stop on video)
   useEffect(() => {
-    if (!gallery || gallery.length <= 1) return
+    if (!gallery || gallery.length <= 1) return;
 
     // Check if current active item is a video
-    const currentItem = gallery[activeImage]
-    const isCurrentVideo = currentItem?.isVideo || currentItem?.type === "video"
+    const currentItem = gallery[activeImage];
+    const isCurrentVideo =
+      currentItem?.isVideo || currentItem?.type === "video";
 
     // Only auto-slide if current item is not a video
     if (isCurrentVideo) {
-      return // Don't set interval for videos
+      return; // Don't set interval for videos
     }
 
     const interval = setInterval(() => {
-      setActiveImage((prev) => (prev + 1) % gallery.length)
-    }, 5000)
+      setActiveImage((prev) => (prev + 1) % gallery.length);
+    }, 5000);
 
-    return () => clearInterval(interval)
-  }, [gallery, activeImage]) // Updated dependency array
+    return () => clearInterval(interval);
+  }, [gallery, activeImage]); // Updated dependency array
 
   const handleFormChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     const enquiryData = {
       carId: id,
       name: formData.name,
@@ -137,42 +163,60 @@ export default function CarDetails({ slugAndId }) {
       phone: formData.phone,
       message: formData.message,
       enquiryType: "general",
-    }
+    };
 
-    const result = await createEnquiry(enquiryData)
+    const result = await createEnquiry(enquiryData);
     if (result.success) {
-      toast.success("Enquiry submitted successfully! We will get back to you soon.")
+      toast.success(
+        "Enquiry submitted successfully! We will get back to you soon."
+      );
       setFormData({
         name: "",
         email: "",
         phone: "",
         message: "",
-      })
+      });
     } else {
-      toast.error(`Failed to submit enquiry: ${result.error}`)
+      toast.error(`Failed to submit enquiry: ${result.error}`);
     }
-  }
+  };
 
   const openGallery = (imageIndex = 0) => {
-    setGalleryActiveImage(imageIndex)
-    setIsGalleryOpen(true)
-  }
+    setGalleryActiveImage(imageIndex);
+    setIsGalleryOpen(true);
+  };
 
   const navigateGallery = (direction) => {
     if (direction === "prev") {
-      setGalleryActiveImage((prev) => (prev - 1 + gallery.length) % gallery.length)
+      setGalleryActiveImage(
+        (prev) => (prev - 1 + gallery.length) % gallery.length
+      );
     } else {
-      setGalleryActiveImage((prev) => (prev + 1) % gallery.length)
+      setGalleryActiveImage((prev) => (prev + 1) % gallery.length);
     }
-  }
+  };
 
   const navigateMain = (direction) => {
     if (direction === "prev") {
-      setActiveImage((prev) => (prev - 1 + gallery.length) % gallery.length)
+      setActiveImage((prev) => (prev - 1 + gallery.length) % gallery.length);
     } else {
-      setActiveImage((prev) => (prev + 1) % gallery.length)
+      setActiveImage((prev) => (prev + 1) % gallery.length);
     }
-  }
+  };
+
+  // Add this helper function near the top of your component
+  const getAvailabilityBadgeStyles = (availability) => {
+    switch (availability) {
+      case "unavailable":
+        return "bg-red-100 text-red-600 border border-red-200";
+      case "available":
+        return "bg-green-100 text-green-600 border border-green-200";
+      case "upcoming":
+        return "bg-blue-100 text-blue-600 border border-blue-200";
+      default:
+        return "bg-gray-100 text-gray-600 border border-gray-200";
+    }
+  };
 
   if (loading || settingsLoading) {
     return (
@@ -185,7 +229,7 @@ export default function CarDetails({ slugAndId }) {
           </div>
         </div>
       </main>
-    )
+    );
   }
 
   if (error || settingsError) {
@@ -193,19 +237,21 @@ export default function CarDetails({ slugAndId }) {
       <main className="flex-1 bg-gray-50 min-h-screen">
         <div className="container mx-auto px-4 py-16 text-center">
           <div className="bg-red-50 border border-red-200 rounded-lg p-8">
-            <p className="text-red-600 font-medium">Error: {error || settingsError}</p>
+            <p className="text-red-600 font-medium">
+              Error: {error || settingsError}
+            </p>
           </div>
         </div>
       </main>
-    )
+    );
   }
 
-  const currentItem = gallery[activeImage]
-  const visibleThumbnails = gallery.slice(0, 4)
-  const hasMoreImages = gallery.length > 4
+  const currentItem = gallery[activeImage];
+  const visibleThumbnails = gallery.slice(0, 4);
+  const hasMoreImages = gallery.length > 4;
 
-  const companyPhone = settings?.companyInfo?.phone
-  const companyWhatsapp = settings?.companyInfo?.whatsapp
+  const companyPhone = settings?.companyInfo?.phone;
+  const companyWhatsapp = settings?.companyInfo?.whatsapp;
 
   return (
     <main className="flex-1 bg-gray-50 min-h-screen">
@@ -226,14 +272,18 @@ export default function CarDetails({ slugAndId }) {
               onClick={() => setIsLiked(!isLiked)}
               className="hover:border-emerald-300"
             >
-              <Heart className={`h-4 w-4 ${isLiked ? "fill-red-500 text-red-500" : "text-gray-500"}`} />
+              <Heart
+                className={`h-4 w-4 ${
+                  isLiked ? "fill-red-500 text-red-500" : "text-gray-500"
+                }`}
+              />
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
-                navigator.clipboard.writeText(window.location.href)
-                toast.success("Link copied to clipboard!")
+                navigator.clipboard.writeText(window.location.href);
+                toast.success("Link copied to clipboard!");
               }}
               className="hover:border-emerald-300"
             >
@@ -356,7 +406,9 @@ export default function CarDetails({ slugAndId }) {
                     ) : (
                       <Image
                         src={item.url || "/placeholder.svg"}
-                        alt={item.alt || `${currentCar?.name} view ${index + 1}`}
+                        alt={
+                          item.alt || `${currentCar?.name} view ${index + 1}`
+                        }
                         fill
                         className="object-cover"
                       />
@@ -373,7 +425,9 @@ export default function CarDetails({ slugAndId }) {
                   onClick={() => openGallery(0)}
                 >
                   <Images className="h-5 w-5" />
-                  <span className="text-xs font-semibold">+{gallery.length - 4}</span>
+                  <span className="text-xs font-semibold">
+                    +{gallery.length - 4}
+                  </span>
                   <span className="text-xs">More</span>
                 </Button>
               )}
@@ -386,8 +440,23 @@ export default function CarDetails({ slugAndId }) {
             <Card className="shadow-lg">
               <CardContent className="p-6">
                 <div className="mb-6">
-                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{currentCar?.name}</h1>
-                  <div className="text-3xl font-bold text-emerald-600 mb-6">৳ {currentCar?.price.toLocaleString()}</div>
+                  <div className="flex justify-end">
+                    <Badge
+                    className={`mb-2 ${getAvailabilityBadgeStyles(currentCar?.availability)}`}
+                  >
+                    {currentCar?.availability?.charAt(0).toUpperCase() +
+                      currentCar?.availability?.slice(1)}
+                  </Badge>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 mb-2">
+                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+                      {currentCar?.name}
+                    </h1>
+                  </div>
+                  <div className="text-3xl font-bold text-emerald-600 mb-6">
+                    ৳ {currentCar?.price.toLocaleString()}
+                  </div>
                 </div>
 
                 {/* Key Specs Grid */}
@@ -403,7 +472,9 @@ export default function CarDetails({ slugAndId }) {
                     <Speedometer className="h-5 w-5 text-emerald-600 mr-3" />
                     <div>
                       <p className="text-sm text-gray-600">Mileage</p>
-                      <p className="font-semibold">{currentCar?.mileage.toLocaleString()} mi</p>
+                      <p className="font-semibold">
+                        {currentCar?.mileage.toLocaleString()} mi
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center p-3 bg-gray-50 rounded-lg">
@@ -417,14 +488,27 @@ export default function CarDetails({ slugAndId }) {
                     <Settings className="h-5 w-5 text-emerald-600 mr-3" />
                     <div>
                       <p className="text-sm text-gray-600">Transmission</p>
-                      <p className="font-semibold">{currentCar?.transmission}</p>
+                      <p className="font-semibold">
+                        {currentCar?.transmission}
+                      </p>
                     </div>
                   </div>
                 </div>
 
+                {/* Similar Products Label */}
+                <div className="flex items-center justify-center gap-2 text-emerald-600 mb-4">
+                  <span className="text-sm font-medium">
+                    For similar product units contact us
+                  </span>
+                  <ArrowDown className="h-4 w-4" />
+                </div>
+
                 {/* Action Buttons */}
                 <div className="space-y-3">
-                  <Button asChild className="w-full h-12 bg-emerald-600 hover:bg-emerald-700">
+                  <Button
+                    asChild
+                    className="w-full h-12 bg-emerald-600 hover:bg-emerald-700"
+                  >
                     <a href={`tel:${companyPhone}`}>
                       <Phone className="h-4 w-4 mr-2" />
                       Call Now
@@ -452,16 +536,25 @@ export default function CarDetails({ slugAndId }) {
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[500px]">
                       <DialogHeader>
-                        <DialogTitle>Enquire About {currentCar?.name}</DialogTitle>
+                        <DialogTitle>
+                          Enquire About {currentCar?.name}
+                        </DialogTitle>
                         <DialogDescription>
-                          Fill out the form below and we'll get back to you as soon as possible.
+                          Fill out the form below and we'll get back to you as
+                          soon as possible.
                         </DialogDescription>
                       </DialogHeader>
                       <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="name">Name</Label>
-                            <Input id="name" name="name" value={formData.name} onChange={handleFormChange} required />
+                            <Input
+                              id="name"
+                              name="name"
+                              value={formData.name}
+                              onChange={handleFormChange}
+                              required
+                            />
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="phone">Phone</Label>
@@ -504,7 +597,11 @@ export default function CarDetails({ slugAndId }) {
                         >
                           {enquiryLoading ? "Sending..." : "Send Enquiry"}
                         </Button>
-                        {enquiryError && <p className="text-red-500 text-sm text-center">{enquiryError}</p>}
+                        {enquiryError && (
+                          <p className="text-red-500 text-sm text-center">
+                            {enquiryError}
+                          </p>
+                        )}
                       </form>
                     </DialogContent>
                   </Dialog>
@@ -524,7 +621,9 @@ export default function CarDetails({ slugAndId }) {
               </div>
               <div className="text-center p-3 bg-white rounded-lg shadow-sm border">
                 <Clock className="h-6 w-6 text-emerald-600 mx-auto mb-1" />
-                <p className="text-xs font-semibold text-gray-700">24/7 Support</p>
+                <p className="text-xs font-semibold text-gray-700">
+                  24/7 Support
+                </p>
               </div>
             </div>
           </div>
@@ -565,19 +664,31 @@ export default function CarDetails({ slugAndId }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {currentCar?.features?.length ? (
                     currentCar?.features.map((feature, index) => (
-                      <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
+                      <div
+                        key={index}
+                        className="flex items-center p-3 bg-gray-50 rounded-lg"
+                      >
                         <Check className="h-4 w-4 text-emerald-600 mr-3" />
                         <span className="text-gray-700">{feature}</span>
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-500 col-span-2 text-center py-8">No features listed.</p>
+                    <p className="text-gray-500 col-span-2 text-center py-8">
+                      No features listed.
+                    </p>
                   )}
                 </div>
               </TabsContent>
               <TabsContent value="specifications" className="p-6">
-                <Accordion type="single" collapsible className="w-full space-y-4">
-                  <AccordionItem value="engine" className="border rounded-lg px-4">
+                <Accordion
+                  type="single"
+                  collapsible
+                  className="w-full space-y-4"
+                >
+                  <AccordionItem
+                    value="engine"
+                    className="border rounded-lg px-4"
+                  >
                     <AccordionTrigger className="hover:no-underline">
                       <div className="flex items-center">
                         <Zap className="h-5 w-5 mr-2 text-emerald-600" />
@@ -588,26 +699,43 @@ export default function CarDetails({ slugAndId }) {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="p-3 bg-gray-50 rounded-lg">
                           <p className="text-sm text-gray-600 mb-1">Engine</p>
-                          <p className="font-semibold">{currentCar?.engine || "N/A"}</p>
-                        </div>
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                          <p className="text-sm text-gray-600 mb-1">Horsepower</p>
                           <p className="font-semibold">
-                            {currentCar?.horsepower ? `${currentCar?.horsepower} hp` : "N/A"}
+                            {currentCar?.engine || "N/A"}
                           </p>
                         </div>
                         <div className="p-3 bg-gray-50 rounded-lg">
-                          <p className="text-sm text-gray-600 mb-1">Transmission</p>
-                          <p className="font-semibold">{currentCar?.transmission}</p>
+                          <p className="text-sm text-gray-600 mb-1">
+                            Horsepower
+                          </p>
+                          <p className="font-semibold">
+                            {currentCar?.horsepower
+                              ? `${currentCar?.horsepower} hp`
+                              : "N/A"}
+                          </p>
                         </div>
                         <div className="p-3 bg-gray-50 rounded-lg">
-                          <p className="text-sm text-gray-600 mb-1">Fuel Type</p>
-                          <p className="font-semibold">{currentCar?.fuelType}</p>
+                          <p className="text-sm text-gray-600 mb-1">
+                            Transmission
+                          </p>
+                          <p className="font-semibold">
+                            {currentCar?.transmission}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <p className="text-sm text-gray-600 mb-1">
+                            Fuel Type
+                          </p>
+                          <p className="font-semibold">
+                            {currentCar?.fuelType}
+                          </p>
                         </div>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
-                  <AccordionItem value="dimensions" className="border rounded-lg px-4">
+                  <AccordionItem
+                    value="dimensions"
+                    className="border rounded-lg px-4"
+                  >
                     <AccordionTrigger className="hover:no-underline">
                       <div className="flex items-center">
                         <Car className="h-5 w-5 mr-2 text-emerald-600" />
@@ -617,8 +745,12 @@ export default function CarDetails({ slugAndId }) {
                     <AccordionContent className="pb-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="p-3 bg-gray-50 rounded-lg">
-                          <p className="text-sm text-gray-600 mb-1">Body Type</p>
-                          <p className="font-semibold">{currentCar?.bodyType}</p>
+                          <p className="text-sm text-gray-600 mb-1">
+                            Body Type
+                          </p>
+                          <p className="font-semibold">
+                            {currentCar?.bodyType}
+                          </p>
                         </div>
                         <div className="p-3 bg-gray-50 rounded-lg">
                           <p className="text-sm text-gray-600 mb-1">Color</p>
@@ -636,7 +768,9 @@ export default function CarDetails({ slugAndId }) {
 
       {/* Full Gallery Modal */}
       <Dialog open={isGalleryOpen} onOpenChange={setIsGalleryOpen}>
-        <DialogTitle className="sr-only">Gallery for {currentCar?.name}</DialogTitle>
+        <DialogTitle className="sr-only">
+          Gallery for {currentCar?.name}
+        </DialogTitle>
         <DialogContent className="max-w-6xl w-full h-[90vh] p-0 bg-black overflow-hidden border-0">
           <div className="relative w-full h-full flex flex-col items-center justify-center">
             {/* Close button */}
@@ -677,17 +811,25 @@ export default function CarDetails({ slugAndId }) {
                       playsInline
                       controls
                     >
-                      <source src={gallery[galleryActiveImage].url} type="video/mp4" />
+                      <source
+                        src={gallery[galleryActiveImage].url}
+                        type="video/mp4"
+                      />
                       Your browser does not support the video tag.
                     </video>
                   ) : (
                     <Image
-                      src={gallery[galleryActiveImage]?.url || "/placeholder.svg"}
-                      alt={gallery[galleryActiveImage]?.alt || `${currentCar?.name} view ${galleryActiveImage + 1}`}
+                      src={
+                        gallery[galleryActiveImage]?.url || "/placeholder.svg"
+                      }
+                      alt={
+                        gallery[galleryActiveImage]?.alt ||
+                        `${currentCar?.name} view ${galleryActiveImage + 1}`
+                      }
                       fill
                       className="object-contain max-h-full"
                       onError={(e) => {
-                        e.target.src = "/placeholder.svg"
+                        e.target.src = "/placeholder.svg";
                       }}
                     />
                   )}
@@ -723,7 +865,9 @@ export default function CarDetails({ slugAndId }) {
                 <div
                   key={index}
                   className={`relative w-20 h-16 mx-1 cursor-pointer rounded-lg overflow-hidden flex-shrink-0 transition-all ${
-                    galleryActiveImage === index ? "ring-2 ring-emerald-400" : "opacity-60 hover:opacity-100"
+                    galleryActiveImage === index
+                      ? "ring-2 ring-emerald-400"
+                      : "opacity-60 hover:opacity-100"
                   }`}
                   onClick={() => setGalleryActiveImage(index)}
                 >
@@ -743,7 +887,7 @@ export default function CarDetails({ slugAndId }) {
                       fill
                       className="object-cover"
                       onError={(e) => {
-                        e.target.src = "/placeholder.svg"
+                        e.target.src = "/placeholder.svg";
                       }}
                     />
                   )}
@@ -754,5 +898,5 @@ export default function CarDetails({ slugAndId }) {
         </DialogContent>
       </Dialog>
     </main>
-  )
+  );
 }
