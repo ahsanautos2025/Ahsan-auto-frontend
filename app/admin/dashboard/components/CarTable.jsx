@@ -27,6 +27,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { getImageUrl } from "@/lib/getImageUrl";
 
@@ -58,6 +59,7 @@ export default function CarTable({
               <TableHead>Name</TableHead>
               <TableHead>Year</TableHead>
               <TableHead>Price</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Featured</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -66,40 +68,71 @@ export default function CarTable({
             {cars.length === 0 && !loading ? (
               <TableRow>
                 <TableCell
-                  colSpan={6}
+                  colSpan={7}
                   className="text-center py-8 text-gray-500"
                 >
                   No cars found. Try a different search or add a new car.
                 </TableCell>
               </TableRow>
             ) : (
-              cars.map((car) => (
-                <TableRow key={car._id}>
-                  <TableCell>
-                    {(() => {
-                      const primaryImage = car.images?.find(
-                        (img) => img.isPrimary
+              cars.map((car) => {
+                const getStatusBadge = (availability) => {
+                  switch (availability) {
+                    case "available":
+                      return (
+                        <Badge className="bg-green-500 hover:bg-green-600 text-white">
+                          Available
+                        </Badge>
                       );
-                      return primaryImage?.url ? (
-                        <Image
-                          src={primaryImage.url}
-                          width={64}
-                          height={64}
-                          alt={primaryImage.alt || car.name}
-                          className="aspect-square rounded-md object-cover"
-                        />
-                      ) : (
-                        <div className="w-16 h-16 rounded-md bg-gray-200 flex items-center justify-center text-xs text-gray-500">
-                          No Image
-                        </div>
+                    case "sold":
+                      return (
+                        <Badge className="bg-red-500 hover:bg-red-600 text-white">
+                          Sold
+                        </Badge>
                       );
-                    })()}
-                  </TableCell>
-                  <TableCell className="font-medium">{car.name}</TableCell>
-                  <TableCell>{car.year}</TableCell>
-                  <TableCell>৳{car.price.toLocaleString()}</TableCell>
-                  <TableCell>{car.featured ? "Yes" : "No"}</TableCell>
-                  <TableCell className="text-right">
+                    case "upcoming":
+                      return (
+                        <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white">
+                          Upcoming
+                        </Badge>
+                      );
+                    default:
+                      return (
+                        <Badge className="bg-gray-500 hover:bg-gray-600 text-white">
+                          {availability || "N/A"}
+                        </Badge>
+                      );
+                  }
+                };
+
+                return (
+                  <TableRow key={car._id}>
+                    <TableCell>
+                      {(() => {
+                        const primaryImage = car.images?.find(
+                          (img) => img.isPrimary
+                        );
+                        return primaryImage?.url ? (
+                          <Image
+                            src={primaryImage.url}
+                            width={64}
+                            height={64}
+                            alt={primaryImage.alt || car.name}
+                            className="aspect-square rounded-md object-cover"
+                          />
+                        ) : (
+                          <div className="w-16 h-16 rounded-md bg-gray-200 flex items-center justify-center text-xs text-gray-500">
+                            No Image
+                          </div>
+                        );
+                      })()}
+                    </TableCell>
+                    <TableCell className="font-medium">{car.name}</TableCell>
+                    <TableCell>{car.year}</TableCell>
+                    <TableCell>৳{car.price.toLocaleString()}</TableCell>
+                    <TableCell>{getStatusBadge(car.availability)}</TableCell>
+                    <TableCell>{car.featured ? "Yes" : "No"}</TableCell>
+                    <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
@@ -135,7 +168,8 @@ export default function CarTable({
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              ))
+                );
+              })
             )}
           </TableBody>
         </Table>

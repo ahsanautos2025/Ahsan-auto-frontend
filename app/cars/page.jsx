@@ -642,7 +642,7 @@ export default function CarsPage() {
 
               {/* Availability Filter Buttons */}
               <div className="flex flex-wrap gap-2">
-                {["available", "upcoming", "unavailable"].map((status) => (
+                {["available", "upcoming", "sold"].map((status) => (
                   <Button
                     key={status}
                     variant={

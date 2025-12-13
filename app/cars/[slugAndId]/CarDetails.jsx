@@ -207,7 +207,7 @@ export default function CarDetails({ slugAndId }) {
   // Add this helper function near the top of your component
   const getAvailabilityBadgeStyles = (availability) => {
     switch (availability) {
-      case "unavailable":
+      case "sold":
         return "bg-red-100 text-red-600 border border-red-200";
       case "available":
         return "bg-green-100 text-green-600 border border-green-200";

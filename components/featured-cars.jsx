@@ -22,7 +22,7 @@ export default function FeaturedCars() {
   // Filter cars by availability
   const availableCars = featuredCars.filter((car) => car.availability === "available")
   const upcomingCars = featuredCars.filter((car) => car.availability === "upcoming")
-  const unavailableCars = featuredCars.filter((car) => car.availability === "unavailable")
+  const soldCars = featuredCars.filter((car) => car.availability === "sold")
 
   // Loading skeleton component
   const SkeletonCard = () => (
@@ -103,6 +103,8 @@ export default function FeaturedCars() {
               ? "Ready for immediate purchase"
               : title === "Upcoming"
               ? "Coming soon to our collection"
+              : title === "Sold"
+              ? "Recently sold vehicles"
               : "Currently not available"}
           </p>
         </motion.div>
@@ -309,7 +311,7 @@ export default function FeaturedCars() {
       <div className="container mx-auto px-6">
         <CarSection title="Available" cars={availableCars} sectionKey="available" />
         <CarSection title="Upcoming" cars={upcomingCars} sectionKey="upcoming" />
-        <CarSection title="Unavailable" cars={unavailableCars} sectionKey="unavailable" />
+        <CarSection title="Sold" cars={soldCars} sectionKey="sold" />
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}

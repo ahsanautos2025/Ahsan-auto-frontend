@@ -37,7 +37,7 @@ export default function EditCarDialog({
   deleteVideo,
 }) {
   const normalizeAvailability = (value) => {
-    const valid = ["available", "unavailable", "upcoming"];
+    const valid = ["available", "sold", "upcoming"];
     return valid.includes(value) ? value : "available";
   };
 
@@ -421,7 +421,7 @@ export default function EditCarDialog({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="available">Available</SelectItem>
-                  <SelectItem value="unavailable">Unavailable</SelectItem>
+                  <SelectItem value="sold">Sold</SelectItem>
                   <SelectItem value="upcoming">Upcoming</SelectItem>
                 </SelectContent>
               </Select>
